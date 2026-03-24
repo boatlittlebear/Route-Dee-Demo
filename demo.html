@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RouteDee — Retail AR Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18.2.0/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700;800;900&display=swap');
+    *, body { font-family: 'Kanit', sans-serif; box-sizing: border-box; }
+
+    @keyframes float      { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes bounce-in  { 0%{transform:scale(.3) rotate(-8deg);opacity:0} 65%{transform:scale(1.12) rotate(2deg);opacity:1} 100%{transform:scale(1) rotate(0)} }
+    @keyframes shake      { 0%,100%{transform:translateX(0) rotate(0)} 20%{transform:translateX(-7px) rotate(-4deg)} 40%{transform:translateX(7px) rotate(4deg)} 60%{transform:translateX(-4px) rotate(-2deg)} 80%{transform:translateX(4px) rotate(2deg)} }
+    @keyframes slide-up   { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+    @keyframes num-glow   { 0%,100%{text-shadow:0 0 6px currentColor} 50%{text-shadow:0 0 22px currentColor,0 0 44px currentColor} }
+    @keyframes gold-pulse { 0%,100%{box-shadow:0 0 8px 2px rgba(255,215,0,.45)} 50%{box-shadow:0 0 28px 6px rgba(255,215,0,.85)} }
+    @keyframes silver-pulse{0%,100%{box-shadow:0 0 8px 2px rgba(192,192,192,.4)} 50%{box-shadow:0 0 22px 5px rgba(192,192,192,.75)}}
+    @keyframes bronze-pulse{0%,100%{box-shadow:0 0 8px 2px rgba(205,127,50,.4)} 50%{box-shadow:0 0 22px 5px rgba(205,127,50,.75)}}
+    @keyframes draw-line  { from{stroke-dashoffset:800} to{stroke-dashoffset:0} }
+    @keyframes walk-dot   { 0%,100%{opacity:1} 50%{opacity:.3} }
+    @keyframes pop-item   { 0%{transform:scale(0);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+    @keyframes calorie-in { 0%{transform:scale(0) rotate(-15deg);opacity:0} 80%{transform:scale(1.1) rotate(2deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
+    @keyframes step-flash { 0%,100%{background:rgba(5,150,105,.15)} 50%{background:rgba(5,150,105,.4)} }
+
+    .ani-float     { animation: float 2.5s ease-in-out infinite }
+    .ani-bounce-in { animation: bounce-in .5s cubic-bezier(.34,1.56,.64,1) forwards }
+    .ani-shake     { animation: shake .38s ease-in-out infinite }
+    .ani-slide-up  { animation: slide-up .4s ease-out forwards }
+    .ani-num-glow  { animation: num-glow 2s ease-in-out infinite }
+    .ani-draw      { stroke-dasharray:800; animation: draw-line 1.5s ease-out forwards }
+    .ani-pop-item  { animation: pop-item .45s cubic-bezier(.34,1.56,.64,1) forwards }
+    .ani-calorie   { animation: calorie-in .6s cubic-bezier(.34,1.56,.64,1) forwards }
+    .ani-step-flash{ animation: step-flash 1.2s ease-in-out infinite }
+
+    .glow-gold  { text-shadow: 0 0 12px #ffd700, 0 0 24px #ffd700 }
+    .glow-cyan  { text-shadow: 0 0 10px #22d3ee, 0 0 22px #22d3ee }
+    .glow-green { text-shadow: 0 0 10px #4ade80, 0 0 22px #4ade80 }
+
+    ::-webkit-scrollbar { width:3px }
+    ::-webkit-scrollbar-track { background:transparent }
+    ::-webkit-scrollbar-thumb { background:#334155; border-radius:2px }
+  </style>
+</head>
+<body style="background:#030712;margin:0">
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ─── WAYPOINTS: the walking route A→B→C→D→E ─── */
+// Each waypoint = one item to collect. Some have a monster nearby.
+const WAYPOINTS = [
+  { label:'A', item:{name:'นมจืด',    emoji:'🥚'}, x:60,  y:55,  zone:'ของสด',
+    monster:{ id:1, brand:'Anlene นมสด', discount:25, rarity:'Rare', rc:'#60a5fa', emoji:'🐉' } },
+  { label:'B', item:{name:'ผงซักฟอก', emoji:'🧺'}, x:160, y:55,  zone:'ของแห้ง',   monster:null },
+  { label:'C', item:{name:'นมจืด',    emoji:'🥛'}, x:60,  y:178, zone:'เครื่องดื่ม',
+    monster:{ id:2, brand:'Attack ผงซักฟอก', discount:10, rarity:'Common', rc:'#4ade80', emoji:'👾' } },
+  { label:'D', item:{name:'แชมพู',    emoji:'🧴'}, x:160, y:178, zone:'เครื่องใช้',
+    monster:{ id:3, brand:'Pantene แชมพู', discount:50, rarity:'Legendary', rc:'#fbbf24', emoji:'⚡' } },
+  { label:'E', item:{name:'ขนมปัง',   emoji:'🍞'}, x:251, y:55,  zone:'เบเกอรี่',   monster:null },
+];
+
+const START = { x:38, y:248 };
+
+// Distance between waypoints (mock meters)
+const DISTANCES = [48, 62, 38, 55, 72]; // A→B→C→D→E, roughly
+
+const LEADERBOARD = [
+  { rank:1,  name:'นักล่าดีล_มิกกี้',  avatar:'🦁', savings:1247, reward:'฿500' },
+  { rank:2,  name:'คุณแม่ประหยัด99',   avatar:'🦊', savings:980,  reward:'฿300' },
+  { rank:3,  name:'ช้อปเก่ง_เจน',      avatar:'🐯', savings:875,  reward:'฿100' },
+  { rank:4,  name:'ดีลมาสเตอร์_พล',   avatar:'🐺', savings:720 },
+  { rank:5,  name:'ประหยัดจัด_นุ้ย',   avatar:'🐨', savings:615 },
+  { rank:6,  name:'SuperSaver_บอส',     avatar:'🦝', savings:475 },
+  { rank:7,  name:'ปลา_ช้อป',          avatar:'🐠', savings:423, isMe:true },
+  { rank:8,  name:'deal_hunter_แพร',    avatar:'🦋', savings:380 },
+  { rank:9,  name:'ขาช้อป_อาร์ม',      avatar:'🐻', savings:290 },
+  { rank:10, name:'ช้อปทุกวัน_มิ้น',  avatar:'🐱', savings:185 },
+];
+
+const DAILY = [45,72,58,90,120,85,28];
+const DAYS  = ['จ','อ','พ','พฤ','ศ','ส','อา'];
+
+/* ─── SVG LINE CHART ─── */
+const LineChart = ({ data, days }) => {
+  const W=240,H=110,pad={t:10,r:10,b:24,l:30};
+  const iW=W-pad.l-pad.r, iH=H-pad.t-pad.b, max=Math.max(...data);
+  const pts = data.map((v,i)=>({ x:pad.l+i*(iW/(data.length-1)), y:pad.t+iH-(v/max)*iH }));
+  const polyPts = pts.map(p=>`${p.x},${p.y}`).join(' ');
+  const area = `${pts[0].x},${pad.t+iH} ${polyPts} ${pts[pts.length-1].x},${pad.t+iH}`;
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#10b981" stopOpacity=".4"/>
+          <stop offset="100%" stopColor="#10b981" stopOpacity="0"/>
+        </linearGradient>
+      </defs>
+      {[0,.25,.5,.75,1].map((r,i)=><line key={i} x1={pad.l} y1={pad.t+iH*r} x2={pad.l+iW} y2={pad.t+iH*r} stroke="#1e3a5f" strokeWidth="1" strokeDasharray="3,3"/>)}
+      {[0,.5,1].map((r,i)=><text key={i} x={pad.l-4} y={pad.t+iH*(1-r)+4} textAnchor="end" fill="#64748b" fontSize="9">{Math.round(max*r)}</text>)}
+      <polygon points={area} fill="url(#lg)"/>
+      <polyline points={polyPts} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="ani-draw"/>
+      {pts.map((p,i)=><circle key={i} cx={p.x} cy={p.y} r="4" fill="#10b981" stroke="#0f172a" strokeWidth="1.5"/>)}
+      {days.map((d,i)=><text key={i} x={pts[i].x} y={H-6} textAnchor="middle" fill="#64748b" fontSize="9">{d}</text>)}
+    </svg>
+  );
+};
+
+/* ─── ANIMATED STORE MAP ─── */
+const StoreMap = ({ stepIdx, moving, collected }) => {
+  // stepIdx: -1=start, 0-4=at waypoint index
+  const currentPos = stepIdx < 0 ? START : WAYPOINTS[stepIdx];
+  return (
+    <svg width="300" height="270" viewBox="0 0 300 270" style={{borderRadius:12,display:'block'}}>
+      <rect width="300" height="270" fill="#0f172a"/>
+      <rect x="8" y="8" width="284" height="254" rx="10" fill="#1e293b" stroke="#334155" strokeWidth="1.5"/>
+
+      {/* zones */}
+      <rect x="16" y="16" width="88" height="78" rx="6" fill="#14532d" stroke="#166534" strokeWidth="1.5"/>
+      <text x="60" y="52" textAnchor="middle" fill="#4ade80" fontSize="9" fontWeight="600">🥬 ของสด</text>
+      <rect x="116" y="16" width="88" height="78" rx="6" fill="#2e1065" stroke="#6d28d9" strokeWidth="1.5"/>
+      <text x="160" y="52" textAnchor="middle" fill="#c084fc" fontSize="9" fontWeight="600">📦 ของแห้ง</text>
+      <rect x="16" y="148" width="88" height="78" rx="6" fill="#172554" stroke="#1d4ed8" strokeWidth="1.5"/>
+      <text x="60" y="184" textAnchor="middle" fill="#60a5fa" fontSize="9" fontWeight="600">🥤 เครื่องดื่ม</text>
+      <rect x="116" y="148" width="88" height="78" rx="6" fill="#431407" stroke="#9a3412" strokeWidth="1.5"/>
+      <text x="160" y="184" textAnchor="middle" fill="#fb923c" fontSize="9" fontWeight="600">🧴 เครื่องใช้</text>
+      <rect x="218" y="16" width="66" height="210" rx="6" fill="#1c1c07" stroke="#713f12" strokeWidth="1.5"/>
+      <text x="251" y="115" textAnchor="middle" fill="#d4a96a" fontSize="9" fontWeight="600">🍞</text>
+      <text x="251" y="127" textAnchor="middle" fill="#d4a96a" fontSize="8">เบเกอรี่</text>
+
+      {/* aisles */}
+      <line x1="108" y1="16" x2="108" y2="226" stroke="#1e3a5f" strokeWidth="1.5" strokeDasharray="5,4"/>
+      <line x1="16" y1="134" x2="214" y2="134" stroke="#1e3a5f" strokeWidth="1.5" strokeDasharray="5,4"/>
+
+      {/* full route (dim) */}
+      <polyline
+        points="38,248 60,178 60,55 160,55 160,178 251,178 251,55"
+        fill="none" stroke="#22d3ee" strokeWidth="2" strokeDasharray="8,5" opacity=".25"/>
+
+      {/* completed route segments */}
+      {WAYPOINTS.map((wp, i) => {
+        if (i > stepIdx) return null;
+        const from = i === 0 ? START : WAYPOINTS[i-1];
+        return (
+          <line key={i}
+            x1={from.x} y1={from.y} x2={wp.x} y2={wp.y}
+            stroke="#22d3ee" strokeWidth="2.5" opacity=".8"
+            className="ani-draw"
+          />
+        );
+      })}
+
+      {/* waypoint pins */}
+      {WAYPOINTS.map((wp, i) => {
+        const done = collected.includes(i);
+        const active = i === stepIdx;
+        return (
+          <g key={i}>
+            {active && (
+              <circle cx={wp.x} cy={wp.y} r="18" fill="rgba(34,211,238,.15)">
+                <animate attributeName="r" values="14;22;14" dur="1.5s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values=".5;.1;.5" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+            )}
+            <circle cx={wp.x} cy={wp.y} r="12"
+              fill={done ? '#059669' : active ? '#0891b2' : '#1e3a5f'}
+              stroke={done ? '#4ade80' : active ? '#22d3ee' : '#334155'}
+              strokeWidth="1.5"/>
+            <text x={wp.x} y={wp.y+4} textAnchor="middle" fontSize="11">
+              {done ? '✅' : wp.item.emoji}
+            </text>
+            {/* label */}
+            <text x={wp.x} y={wp.y-16} textAnchor="middle" fill="#94a3b8" fontSize="8" fontWeight="600">
+              {wp.label}
+            </text>
+            {/* monster glow if present and not caught */}
+            {wp.monster && !done && i <= stepIdx+1 && (
+              <>
+                <circle cx={wp.x+16} cy={wp.y-14} r="8" fill="rgba(255,215,0,.1)">
+                  <animate attributeName="r" values="6;12;6" dur="2s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values=".5;.1;.5" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx={wp.x+16} cy={wp.y-14} r="6" fill="rgba(255,215,0,.8)" stroke="#ffd700" strokeWidth="1.5">
+                  <animate attributeName="r" values="5;7;5" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+                <text x={wp.x+16} y={wp.y-10} textAnchor="middle" fontSize="8">{wp.monster.emoji}</text>
+              </>
+            )}
+          </g>
+        );
+      })}
+
+      {/* user dot — smooth move via CSS transition */}
+      <g style={{
+        transform: `translate(${currentPos.x}px, ${currentPos.y}px)`,
+        transition: moving ? 'transform 1.4s cubic-bezier(.4,0,.2,1)' : 'none'
+      }}>
+        <circle r="11" fill="#3b82f6" stroke="white" strokeWidth="2.5">
+          {moving && <animate attributeName="r" values="9;12;9" dur=".6s" repeatCount="indefinite"/>}
+          {!moving && <animate attributeName="opacity" values="1;.4;1" dur="1.2s" repeatCount="indefinite"/>}
+        </circle>
+        <text y="4" textAnchor="middle" fontSize="10">🧑</text>
+      </g>
+
+      {/* start label */}
+      <text x="38" y="263" textAnchor="middle" fill="#64748b" fontSize="7">เริ่มต้น</text>
+
+      {/* legend */}
+      <circle cx="110" cy="263" r="4" fill="rgba(255,215,0,.8)"/>
+      <text x="118" y="267" fill="#fcd34d" fontSize="7">= คูปองปีศาจ</text>
+    </svg>
+  );
+};
+
+/* ─── WALKING NAVIGATOR (replaces old MAP screen) ─── */
+const WalkNavigator = ({
+  stepIdx, moving, collected, coupons,
+  onWalk, onMonsterEncounter, onFinish, lives
+}) => {
+  const atWaypoint  = stepIdx >= 0 && stepIdx < WAYPOINTS.length;
+  const wp          = atWaypoint ? WAYPOINTS[stepIdx] : null;
+  const justArrived = atWaypoint && collected.includes(stepIdx);
+  const hasMonster  = wp && wp.monster && !coupons.find(c=>c.id===wp.monster.id);
+  const allDone     = collected.length === WAYPOINTS.length;
+  const distWalked  = DISTANCES.slice(0, collected.length).reduce((a,b)=>a+b,0);
+
+  return (
+    <div className="h-full overflow-y-auto p-3" style={{background:'#080c1a'}}>
+      {/* progress bar */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-white font-bold text-sm">เส้นทางช้อป 🗺️</div>
+        <div className="text-xs text-cyan-300 font-semibold">
+          {collected.length}/{WAYPOINTS.length} รายการ
+        </div>
+      </div>
+
+      {/* step trail */}
+      <div className="flex items-center gap-1 mb-3">
+        <div className="text-gray-600 text-xs">START</div>
+        {WAYPOINTS.map((wp,i) => (
+          <React.Fragment key={i}>
+            <div className="h-px flex-1" style={{background: collected.includes(i)?'#22d3ee':'#1e3a5f'}}/>
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm
+              border transition-all
+              ${collected.includes(i) ? 'border-emerald-400 bg-emerald-900/60' :
+                i===stepIdx+1 ? 'border-cyan-500 bg-cyan-900/40 ani-step-flash' :
+                'border-slate-700 bg-slate-900'}`}>
+              {collected.includes(i) ? '✅' : wp.item.emoji}
+            </div>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* map */}
+      <StoreMap stepIdx={stepIdx} moving={moving} collected={collected}/>
+
+      {/* status card */}
+      <div className="mt-2.5">
+
+        {/* still at start or walking */}
+        {stepIdx < 0 && !moving && (
+          <button onClick={onWalk}
+            className="w-full py-3.5 rounded-2xl font-bold text-white text-base"
+            style={{background:'linear-gradient(135deg,#059669,#0891b2)',boxShadow:'0 4px 18px rgba(5,150,105,.35)'}}>
+            🚶 เริ่มเดินช้อป!
+          </button>
+        )}
+
+        {moving && (
+          <div className="rounded-2xl p-3 border border-cyan-700/50 text-center ani-step-flash"
+            style={{background:'rgba(8,145,178,.1)'}}>
+            <div className="text-cyan-300 font-bold text-sm">🚶 กำลังเดินไป {wp ? `จุด ${wp.label}` : '…'}</div>
+            <div className="text-gray-400 text-xs mt-0.5">ตามเส้นทางที่วางแผนไว้</div>
+          </div>
+        )}
+
+        {/* arrived at waypoint */}
+        {!moving && atWaypoint && (
+          <div className="ani-pop-item">
+            {/* item collected card */}
+            <div className="rounded-2xl p-3 mb-2 border border-emerald-600/50"
+              style={{background:'linear-gradient(135deg,rgba(5,78,22,.6),rgba(3,52,44,.6))'}}>
+              <div className="flex items-center gap-2">
+                <span className="text-3xl">{wp.item.emoji}</span>
+                <div className="flex-1">
+                  <div className="text-emerald-300 text-xs font-semibold">✅ เจอแล้ว! จุด {wp.label}</div>
+                  <div className="text-white font-bold text-base">{wp.item.name}</div>
+                  <div className="text-gray-400 text-xs">Zone: {wp.zone}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-cyan-300 text-xs">+{DISTANCES[stepIdx]} เมตร</div>
+                </div>
+              </div>
+            </div>
+
+            {/* monster encounter button */}
+            {hasMonster && (
+              <button onClick={onMonsterEncounter}
+                className="w-full py-3 rounded-2xl font-bold text-white mb-2"
+                style={{background:'linear-gradient(135deg,#6d28d9,#db2777)',
+                  boxShadow:'0 0 20px rgba(109,40,217,.5)',
+                  animation:'float 2s ease-in-out infinite'}}>
+                ⚡ ปีศาจ{wp.monster.rarity}โผล่แล้ว! {wp.monster.emoji} — แตะเพื่อจับ!
+              </button>
+            )}
+
+            {/* next / finish */}
+            {!allDone ? (
+              <button onClick={onWalk}
+                className="w-full py-3 rounded-2xl font-bold text-white text-sm"
+                style={{background:'linear-gradient(135deg,#0891b2,#1d4ed8)'}}>
+                🚶 เดินต่อ → จุด {WAYPOINTS[stepIdx+1]?.label || ''}
+              </button>
+            ) : (
+              <button onClick={onFinish}
+                className="w-full py-3.5 rounded-2xl font-black text-white text-base"
+                style={{background:'linear-gradient(135deg,#f59e0b,#ef4444)',
+                  boxShadow:'0 4px 20px rgba(245,158,11,.5)'}}>
+                🏁 เก็บของครบแล้ว — ดูสรุป!
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* stats mini bar */}
+        <div className="flex gap-2 mt-2">
+          {[
+            { icon:'👟', label:'ก้าว', value: Math.round(distWalked * 1.3) },
+            { icon:'📏', label:'เมตร', value: distWalked },
+            { icon:'🔥', label:'kcal', value: Math.round(distWalked * 0.04 * 1.2) },
+          ].map((s,i)=>(
+            <div key={i} className="flex-1 rounded-xl p-2 text-center border border-slate-700"
+              style={{background:'rgba(255,255,255,.04)'}}>
+              <div className="text-lg leading-none">{s.icon}</div>
+              <div className="text-white font-bold text-sm">{s.value.toLocaleString()}</div>
+              <div className="text-gray-500 text-xs">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── MONSTER CATCH (with retry) ─── */
+const MonsterCatch = ({ monster, lives, onCaught, onEscape, onBack, onLiveLost }) => {
+  const [phase, setPhase] = useState('encounter'); // encounter | throwing | success | fail
+  const [attempts, setAttempts] = useState(0);
+
+  const handleThrow = () => {
+    setPhase('throwing');
+    setTimeout(() => {
+      const ok = Math.random() > 0.45;
+      setPhase(ok ? 'success' : 'fail');
+      if (ok) {
+        setTimeout(() => onCaught(monster), 600);
+      } else {
+        setAttempts(a => a+1);
+        onLiveLost(); // ← แจ้ง App ลด lives จริง
+      }
+    }, 1100);
+  };
+
+  return (
+    <div className="h-full flex flex-col items-center justify-center p-5"
+      style={{background:'linear-gradient(160deg,#12002e,#0d1a4a)'}}>
+
+      {phase !== 'success' && (
+        <div className="w-full flex justify-between items-center mb-3">
+          <div className="text-xs text-gray-500">
+            ครั้งที่ {attempts+1} {attempts>0 && `(พลาด ${attempts} ครั้ง)`}
+          </div>
+          <div className="text-base leading-none">
+            {'❤️'.repeat(lives)}{'🖤'.repeat(5-lives)}
+          </div>
+        </div>
+      )}
+
+      {/* monster display */}
+      {phase !== 'success' && (
+        <>
+          <div className="text-yellow-400 text-xs font-bold rounded-full px-3 py-1.5 mb-3
+            border border-yellow-500/50" style={{background:'rgba(120,60,0,.2)'}}>
+            ⚡ พบปีศาจ{monster.rarity}!
+          </div>
+          <div
+            className="text-8xl mb-2 ani-float"
+            style={{
+              filter:`drop-shadow(0 0 28px rgba(180,80,255,.85))`,
+              animation: phase==='throwing' ? 'shake .3s ease-in-out infinite' :
+                         phase==='fail' ? 'float 0s' : undefined,
+            }}>
+            {phase==='fail' ? '💨' : monster.emoji}
+          </div>
+          <div className="font-bold text-sm mb-3" style={{color:monster.rc}}>⭐ {monster.rarity}</div>
+
+          <div className="w-full rounded-2xl p-3 text-center mb-4 border border-purple-500/40"
+            style={{background:'rgba(46,16,101,.55)'}}>
+            <div className="text-white font-bold text-base">{monster.brand}</div>
+            <div className="font-black text-3xl text-green-400">ลด ฿{monster.discount}</div>
+          </div>
+        </>
+      )}
+
+      {/* ENCOUNTER — throw button */}
+      {phase==='encounter' && (
+        <>
+          <button onClick={handleThrow}
+            className="w-full py-4 rounded-2xl font-black text-white text-xl mb-2"
+            style={{background:'linear-gradient(135deg,#7c3aed,#db2777)',boxShadow:'0 4px 24px rgba(124,58,237,.5)'}}>
+            🎯 ขว้าง!
+          </button>
+          <button onClick={onBack} className="text-slate-500 text-sm underline">
+            หนีกลับ (ไม่เสียชีวิต)
+          </button>
+        </>
+      )}
+
+      {/* THROWING — loading */}
+      {phase==='throwing' && (
+        <div className="w-full py-4 rounded-2xl text-center bg-slate-700 text-white font-bold text-lg">
+          ⚡ กำลังขว้าง…
+        </div>
+      )}
+
+      {/* FAIL — retry or run */}
+      {phase==='fail' && (
+        <div className="w-full ani-bounce-in">
+          <div className="text-red-400 font-bold text-lg text-center mb-1">หลุดมือ! 😤</div>
+          <div className="text-gray-400 text-xs text-center mb-3">
+            ปีศาจหนีได้ชั่วคราว… ❤️ −1
+          </div>
+          <button onClick={()=>{setPhase('encounter');}}
+            className="w-full py-3 rounded-xl text-white font-bold mb-2"
+            style={{background:'linear-gradient(135deg,#7c3aed,#db2777)'}}>
+            🎯 ลองอีกครั้ง!
+          </button>
+          <button onClick={()=>onEscape(monster)}
+            className="w-full py-2.5 rounded-xl text-red-300 font-semibold text-sm border border-red-800"
+            style={{background:'rgba(127,29,29,.3)'}}>
+            🏃 หนีเลย (ไม่เสียชีวิตเพิ่ม)
+          </button>
+        </div>
+      )}
+
+      {/* SUCCESS */}
+      {phase==='success' && (
+        <div className="text-center ani-bounce-in">
+          <div className="text-7xl mb-2">🎉</div>
+          <div className="text-green-400 font-black text-2xl mb-1">จับได้แล้ว!</div>
+          <div className="text-green-300 font-bold text-xl">฿{monster.discount} เข้ากระเป๋า!</div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ─── SHOPPING SUMMARY (calories etc.) ─── */
+const ShoppingSummary = ({ collected, coupons, lives, onViewCoupons, onLeaderboard }) => {
+  const totalDist   = DISTANCES.reduce((a,b)=>a+b,0);
+  const totalSteps  = Math.round(totalDist * 1.35);
+  const calories    = Math.round(totalDist * 0.048 * 60 / 1000 * 65); // MET~3.5
+  const totalSaved  = coupons.reduce((a,c)=>a+c.discount, 0);
+  const timeMins    = 18; const timeSecs = 32;
+
+  return (
+    <div className="h-full overflow-y-auto" style={{background:'#080c1a'}}>
+      <div className="px-4 pt-5 pb-3 text-center"
+        style={{background:'linear-gradient(180deg,rgba(5,150,105,.2),transparent)'}}>
+        <div className="text-5xl mb-1">🏁</div>
+        <h2 className="text-white font-black text-xl">ช้อปเสร็จแล้ว!</h2>
+        <p className="text-emerald-300 text-xs mt-0.5">เก็บของครบ {collected.length}/{WAYPOINTS.length} รายการ</p>
+      </div>
+
+      {/* route recap */}
+      <div className="px-4 mb-3">
+        <div className="text-gray-500 text-xs mb-2 text-center">เส้นทางที่เดิน</div>
+        <div className="flex items-center justify-center gap-1 flex-wrap">
+          <div className="text-xs text-gray-500 font-mono px-1.5 py-0.5 rounded-md border border-slate-700"
+            style={{background:'rgba(255,255,255,.04)'}}>เริ่ม</div>
+          {WAYPOINTS.map((wp,i)=>(
+            <React.Fragment key={i}>
+              <div className="text-gray-600 text-xs">→</div>
+              <div className="flex flex-col items-center">
+                <div className={`text-xs font-bold px-2 py-1 rounded-lg border
+                  ${i<collected.length ? 'border-emerald-500 text-emerald-300' : 'border-slate-700 text-gray-600'}`}
+                  style={{background:i<collected.length?'rgba(5,150,105,.15)':'rgba(255,255,255,.03)'}}>
+                  {wp.label} {wp.item.emoji}
+                </div>
+                <div className="text-gray-600 text-xs">{DISTANCES[i]}m</div>
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+
+      {/* big stats */}
+      <div className="px-4 grid grid-cols-2 gap-2.5 mb-3">
+        {[
+          { icon:'🔥', label:'แคลอรี่เผาไหม้', value:calories, unit:'kcal',
+            from:'#7c2d12',to:'#92400e', glow:'rgba(239,68,68,.3)' },
+          { icon:'👟', label:'จำนวนก้าว',       value:totalSteps.toLocaleString(), unit:'ก้าว',
+            from:'#1e3a5f',to:'#1e40af', glow:'rgba(59,130,246,.3)' },
+          { icon:'📏', label:'ระยะทางรวม',      value:totalDist, unit:'เมตร',
+            from:'#14532d',to:'#065f46', glow:'rgba(16,185,129,.3)' },
+          { icon:'⏱',  label:'ใช้เวลา',          value:`${timeMins}:${String(timeSecs).padStart(2,'0')}`, unit:'น.',
+            from:'#312e81',to:'#4c1d95', glow:'rgba(139,92,246,.3)' },
+        ].map((s,i)=>(
+          <div key={i} className="rounded-2xl p-3 text-center border border-white/10 ani-calorie"
+            style={{
+              background:`linear-gradient(135deg,${s.from},${s.to})`,
+              boxShadow:`0 4px 20px ${s.glow}`,
+              animationDelay:`${i*0.1}s`
+            }}>
+            <div className="text-3xl mb-1">{s.icon}</div>
+            <div className="text-white font-black text-2xl leading-none">{s.value}</div>
+            <div className="text-white/60 text-xs mt-0.5">{s.unit}</div>
+            <div className="text-white/50 text-xs">{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* savings */}
+      {totalSaved > 0 && (
+        <div className="px-4 mb-3">
+          <div className="rounded-2xl p-3 border border-yellow-600/50 text-center"
+            style={{background:'linear-gradient(135deg,rgba(120,60,0,.3),rgba(45,20,0,.3))'}}>
+            <div className="text-yellow-300 text-xs font-semibold mb-0.5">💰 ประหยัดได้วันนี้</div>
+            <div className="text-yellow-400 font-black text-3xl glow-gold">฿{totalSaved}</div>
+            <div className="text-gray-400 text-xs mt-0.5">{coupons.length} คูปองที่จับได้</div>
+          </div>
+        </div>
+      )}
+
+      {/* compare fun fact */}
+      <div className="px-4 mb-3">
+        <div className="rounded-xl p-3 border border-slate-700 text-xs text-center"
+          style={{background:'rgba(255,255,255,.03)'}}>
+          <span className="text-gray-400">เดินวันนี้เท่ากับ </span>
+          <span className="text-cyan-300 font-bold">ขึ้นลิฟท์ {Math.round(calories/7)} ชั้น 🏢</span>
+          <span className="text-gray-400"> หรือ </span>
+          <span className="text-orange-300 font-bold">กิน {Math.round(calories/52)} กล้วย 🍌</span>
+        </div>
+      </div>
+
+      {/* buttons */}
+      <div className="px-4 pb-4 flex gap-2">
+        <button onClick={onViewCoupons}
+          className="flex-1 py-3 rounded-xl text-white font-bold text-sm"
+          style={{background:'linear-gradient(135deg,#059669,#0d9488)'}}>
+          🎫 ดูคูปอง ({coupons.length})
+        </button>
+        <button onClick={onLeaderboard}
+          className="flex-1 py-3 rounded-xl text-white font-bold text-sm"
+          style={{background:'linear-gradient(135deg,#7c3aed,#1d4ed8)'}}>
+          🏆 อันดับ
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* ─── LEADERBOARD ─── */
+const Leaderboard = () => (
+  <div className="h-full overflow-y-auto"
+    style={{background:'linear-gradient(160deg,#12002e 0%,#0d1a4a 55%,#050a1a 100%)'}}>
+    <div className="sticky top-0 z-10 px-4 pt-5 pb-3 text-center"
+      style={{background:'linear-gradient(160deg,#12002e,#0d1a4a)'}}>
+      <div className="text-5xl leading-none mb-1" style={{filter:'drop-shadow(0 0 18px #ffd700)'}}>🏆</div>
+      <h2 className="font-black text-xl glow-gold" style={{color:'#ffd700'}}>The Deal Hunter</h2>
+      <p className="text-purple-300 text-xs mt-0.5">สุดยอดนักล่าดีลประจำเดือน มี.ค. 2569</p>
+      <div className="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5
+        border border-purple-500/60" style={{background:'rgba(88,28,135,.35)'}}>
+        <span className="text-purple-300 text-xs">⏱</span>
+        <span className="text-white font-mono text-xs">
+          รีเซ็ตอันดับใน <span className="text-yellow-300 font-bold">8วัน 14ชม. 23น.</span>
+        </span>
+      </div>
+      <div className="mt-1.5 text-gray-500 text-xs">วัดจาก 💰 Total Savings — ยอดส่วนลดสะสมที่ใช้จริง</div>
+    </div>
+
+    <div className="px-3 mt-1">
+      <div className="flex items-end justify-center gap-1.5">
+        {[1,0,2].map(ri=>{
+          const p=LEADERBOARD[ri];
+          const heights=[52,72,40]; const podiumH=heights[ri===0?1:ri===1?0:2];
+          const clrs={ 0:{c:'#ffd700',bg:'linear-gradient(180deg,#b8860b,#ffd700,#b8860b)',shadow:'rgba(255,215,0,.65)',icon:'👑'},
+                        1:{c:'#c0c0c0',bg:'linear-gradient(180deg,#64748b,#334155)',shadow:'rgba(192,192,192,.4)',icon:'🥈'},
+                        2:{c:'#cd7f32',bg:'linear-gradient(180deg,#92400e,#b45309)',shadow:'rgba(205,127,50,.4)',icon:'🥉'} };
+          const cl=clrs[ri];
+          return (
+            <div key={p.rank} className="flex flex-col items-center flex-1">
+              <div className="text-4xl leading-none mb-1 ani-float"
+                style={{animationDelay:`${ri*.3}s`,filter:`drop-shadow(0 0 12px ${cl.c})`}}>
+                {p.avatar}
+              </div>
+              <div className="font-semibold text-xs text-center leading-tight px-1 mb-1" style={{color:cl.c}}>
+                {p.name}
+              </div>
+              <div className="font-bold text-sm ani-num-glow" style={{color:cl.c}}>
+                ฿{p.savings.toLocaleString()}
+              </div>
+              {ri===0 && <div className="text-yellow-300 text-xs font-bold">แชมป์นักล่าดีล</div>}
+              <div className="w-full mt-1.5 rounded-t-xl flex items-center justify-center"
+                style={{height:`${podiumH}px`,background:cl.bg,boxShadow:`0 0 18px ${cl.shadow}`}}>
+                <span className="text-3xl">{cl.icon}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="grid grid-cols-3 gap-1.5 mt-3">
+        {[
+          {label:'คูปองส่วนลด ฿500',c:'border-yellow-500 text-yellow-300',bg:'rgba(120,80,0,.25)'},
+          {label:'คูปองส่วนลด ฿300',c:'border-gray-400 text-gray-300',bg:'rgba(80,80,80,.2)'},
+          {label:'คูปองส่วนลด ฿100',c:'border-orange-500 text-orange-300',bg:'rgba(120,50,0,.25)'},
+        ].map((r,i)=>(
+          <div key={i} className={`border rounded-xl py-2 px-1 text-center ${r.c}`} style={{background:r.bg}}>
+            <div className="text-xs">🎁 รางวัล</div>
+            <div className="font-bold text-xs mt-0.5">{r.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="px-3 py-3 space-y-1.5">
+      <div className="text-center text-gray-700 text-xs mb-1">— อันดับ 4–10 —</div>
+      {LEADERBOARD.slice(3).map((p,idx)=>(
+        <div key={p.rank}
+          className={`rounded-xl px-3 py-2 flex items-center gap-2.5 border ani-slide-up
+            ${p.isMe?'border-cyan-400 ring-1 ring-cyan-400':'border-white/10'}`}
+          style={{background:p.isMe?'rgba(8,145,178,.18)':'rgba(255,255,255,.04)',animationDelay:`${idx*.05}s`}}>
+          <div className="w-6 text-center font-bold text-xs text-gray-500">#{p.rank}</div>
+          <div className="text-2xl leading-none">{p.avatar}</div>
+          <div className="flex-1 min-w-0">
+            <div className={`text-xs font-semibold truncate ${p.isMe?'text-cyan-300':'text-white'}`}>
+              {p.name}{p.isMe&&<span className="ml-1 text-cyan-500 text-xs">← ฉัน</span>}
+            </div>
+          </div>
+          <div className={`font-bold text-sm ${p.isMe?'glow-cyan text-cyan-300':'text-green-400'}`}>
+            ฿{p.savings.toLocaleString()}
+          </div>
+        </div>
+      ))}
+      <div className="mt-2 rounded-xl p-3 text-center border border-cyan-500/40"
+        style={{background:'linear-gradient(135deg,rgba(8,145,178,.18),rgba(29,78,216,.15))'}}>
+        <div className="text-cyan-300 font-bold text-sm">🎯 ฉัน (อันดับ 7)</div>
+        <div className="text-white text-xs mt-0.5">
+          อีกแค่ <span className="text-yellow-300 font-black text-base">฿52</span> จะขึ้นอันดับ 6!
+        </div>
+        <div className="text-gray-500 text-xs mt-0.5">ล่าคูปองเพิ่มเพื่อแย่งอันดับ 🔥</div>
+      </div>
+      <div style={{height:8}}/>
+    </div>
+  </div>
+);
+
+/* ─── COUPON WALLET ─── */
+const CouponWallet = ({ coupons, onGoHunt }) => (
+  <div className="h-full overflow-y-auto p-3" style={{background:'#080c1a'}}>
+    <h2 className="text-white font-bold text-base mb-3">🎫 กระเป๋าคูปอง</h2>
+    {coupons.length===0 ? (
+      <div className="text-center py-16">
+        <div className="text-5xl mb-3">🎯</div>
+        <div className="text-gray-400 text-sm">ยังไม่มีคูปอง</div>
+        <div className="text-gray-600 text-xs mt-1 mb-5">ล่าปีศาจระหว่างช้อป!</div>
+        <button onClick={onGoHunt} className="px-6 py-2.5 rounded-xl text-white font-bold text-sm"
+          style={{background:'linear-gradient(135deg,#0891b2,#6d28d9)'}}>🗺️ ไปช้อป</button>
+      </div>
+    ) : (
+      <div className="space-y-2.5">
+        {coupons.map(c=>(
+          <div key={c.uid||c.id} className="rounded-2xl p-3 border border-purple-500/40"
+            style={{background:'linear-gradient(135deg,#2e1065,#1e1b4b)'}}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-3xl">{c.emoji}</span>
+              <div className="flex-1">
+                <div className="text-white font-bold text-sm">{c.brand}</div>
+                <div className="text-xs font-semibold" style={{color:c.rc}}>{c.rarity}</div>
+              </div>
+              <div className="text-green-400 font-bold text-xl">-฿{c.discount}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-gray-400 text-xs">หมดอายุ 31 มี.ค. 2569</div>
+              <button className="px-3 py-1.5 rounded-lg text-white font-bold text-xs"
+                style={{background:'linear-gradient(135deg,#059669,#0891b2)'}}>📱 ใช้คูปอง</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+/* ─── BRAND DASHBOARD ─── */
+const BrandDashboard = () => (
+  <div className="rounded-2xl border border-slate-700 p-6"
+    style={{background:'linear-gradient(160deg,#0f172a,#1e293b)'}}>
+    <div className="flex items-start justify-between mb-6">
+      <div>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="px-3 py-1 rounded-lg font-bold text-sm text-white"
+            style={{background:'linear-gradient(135deg,#1d4ed8,#3b82f6)'}}>RetailAR</div>
+          <span className="text-slate-400 text-sm">Brand Analytics Dashboard</span>
+        </div>
+        <h1 className="text-white font-bold text-xl">📊 Campaign Overview</h1>
+        <p className="text-slate-400 text-sm">Attack ผงซักฟอก — มีนาคม 2569</p>
+      </div>
+      <div className="text-right">
+        <div className="text-slate-500 text-xs">Last updated</div>
+        <div className="text-slate-200 text-sm font-mono">24 มี.ค. 2569, 09:41</div>
+      </div>
+    </div>
+    <div className="grid grid-cols-4 gap-4 mb-6">
+      {[
+        {icon:'🎫',label:'คูปองแจกไป',       value:'1,247',     unit:'ใบ', from:'#1e3a5f',to:'#1e2d5f'},
+        {icon:'✅',label:'ใช้จริง (Redeem)',  value:'498',       unit:'ใบ', from:'#14432a',to:'#0f2e1a',sub:'Redemption: 39.9%',sc:'text-emerald-300'},
+        {icon:'📈',label:'ยอดขายเพิ่ม',      value:'+฿124,500', unit:'',   from:'#14532d',to:'#0f3020'},
+        {icon:'🚀',label:'ROI',               value:'4.2×',      unit:'',   from:'#3b0764',to:'#2e1065',sub:'vs ลงทุน ฿30k',sc:'text-purple-300'},
+      ].map((k,i)=>(
+        <div key={i} className="rounded-xl p-4 border border-white/10"
+          style={{background:`linear-gradient(135deg,${k.from},${k.to})`}}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-2xl">{k.icon}</span>
+            <span className="text-slate-300 text-xs">{k.label}</span>
+          </div>
+          <div className="text-white font-bold text-2xl leading-none">
+            {k.value}<span className="text-sm font-normal text-slate-400 ml-1">{k.unit}</span>
+          </div>
+          {k.sub&&<div className={`text-xs mt-1 font-semibold ${k.sc}`}>{k.sub}</div>}
+        </div>
+      ))}
+    </div>
+    <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="rounded-xl p-4 border border-slate-700" style={{background:'#1e293b'}}>
+        <h3 className="text-white font-bold text-sm mb-4">📊 Redemption Rate เปรียบเทียบ</h3>
+        {[
+          {label:'🎮 RouteDee AR Coupon',pct:39.9,from:'#059669',to:'#0891b2',tc:'text-emerald-400',w:'80%'},
+          {label:'📄 คูปองกระดาษ (Avg)', pct:2.5, from:'#dc2626',to:'#b91c1c',tc:'text-red-400',w:'5%'},
+        ].map((b,i)=>(
+          <div key={i} className="mb-3">
+            <div className="flex justify-between mb-1.5">
+              <span className="text-slate-300 text-xs">{b.label}</span>
+              <span className={`font-bold text-xs ${b.tc}`}>{b.pct}%</span>
+            </div>
+            <div className="bg-slate-700 rounded-full h-7 overflow-hidden">
+              <div className="h-full rounded-full flex items-center justify-end pr-2"
+                style={{width:b.w,background:`linear-gradient(90deg,${b.from},${b.to})`}}>
+                {b.pct>5&&<span className="text-white text-xs font-bold">{b.pct}%</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+        <div className="rounded-xl p-2.5 border border-emerald-600/50 mt-3"
+          style={{background:'rgba(5,150,105,.12)'}}>
+          <span className="text-emerald-300 font-bold text-sm">
+            ✨ RouteDee ดีกว่าคูปองกระดาษ <span className="text-xl font-black">16×</span>!
+          </span>
+        </div>
+      </div>
+      <div className="rounded-xl p-4 border border-slate-700" style={{background:'#1e293b'}}>
+        <h3 className="text-white font-bold text-sm mb-3">📈 Daily Redemption (7 วัน)</h3>
+        <LineChart data={DAILY} days={DAYS}/>
+        <div className="flex justify-between mt-1">
+          <span className="text-slate-500 text-xs">สูงสุด: 120 ใบ (วันศุกร์)</span>
+          <span className="text-emerald-400 text-xs font-semibold">รวม 498 ใบ</span>
+        </div>
+      </div>
+    </div>
+    <div className="grid grid-cols-3 gap-4">
+      <div className="rounded-xl p-4 border border-slate-700" style={{background:'#1e293b'}}>
+        <h3 className="text-white font-bold text-sm mb-3">🔥 Traffic Heatmap</h3>
+        {[
+          {zone:'🧺 ของแห้ง',    pct:85,c:'#ef4444'},
+          {zone:'🥬 ของสด',      pct:72,c:'#f97316'},
+          {zone:'🥤 เครื่องดื่ม',pct:60,c:'#eab308'},
+          {zone:'🧴 เครื่องใช้', pct:45,c:'#22c55e'},
+          {zone:'🍞 เบเกอรี่',   pct:30,c:'#3b82f6'},
+        ].map((z,i)=>(
+          <div key={i} className="mb-2">
+            <div className="flex justify-between mb-1">
+              <span className="text-slate-300 text-xs">{z.zone}</span>
+              <span className="text-slate-400 text-xs">{z.pct}%</span>
+            </div>
+            <div className="bg-slate-700 rounded-full h-2.5">
+              <div className="h-full rounded-full" style={{width:`${z.pct}%`,background:z.c}}/>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="col-span-2 rounded-xl p-4 border border-slate-700" style={{background:'#1e293b'}}>
+        <h3 className="text-white font-bold text-sm mb-3">💰 Revenue Streams</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            {icon:'🏪',label:'SaaS Subscription', desc:'รีเทลจ่ายรายปี',           value:'฿360,000/ปี',    b:'border-blue-500'},
+            {icon:'🤝',label:'Brand Deal Margin',  desc:'ส่วนต่างจากแบรนด์คูปอง',  value:'฿24,900/แคมเปญ', b:'border-purple-500'},
+            {icon:'📊',label:'Data Analytics',     desc:'Heatmap + Customer Insight',value:'฿15,000/เดือน', b:'border-emerald-500'},
+            {icon:'🚀',label:'Total Brand ROI',    desc:'จากแคมเปญ Attack มี.ค.',   value:'4.2× Return',    b:'border-yellow-500'},
+          ].map((r,i)=>(
+            <div key={i} className={`border-l-4 ${r.b} rounded-r-xl p-3`}
+              style={{background:'rgba(255,255,255,.04)'}}>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-lg">{r.icon}</span>
+                <span className="text-slate-200 text-xs font-semibold">{r.label}</span>
+              </div>
+              <div className="text-slate-400 text-xs mb-1">{r.desc}</div>
+              <div className="text-white font-bold text-sm">{r.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── MAIN APP ─── */
+const App = () => {
+  const [view,        setView]        = useState('customer');
+  const [screen,      setScreen]      = useState('list');
+  const [activeTab,   setActiveTab]   = useState('home');
+  const [lives,       setLives]       = useState(5);
+
+  // walking state
+  const [walkStep,   setWalkStep]    = useState(-1);  // -1=at start, 0-4=at waypoint
+  const [moving,     setMoving]      = useState(false);
+  const [collected,  setCollected]   = useState([]);   // waypoint indices collected
+
+  // monster state
+  const [activeMonster, setActiveMonster] = useState(null);
+  const [coupons,  setCoupons]   = useState([]);
+
+  const goTab = (tab) => {
+    setActiveTab(tab);
+    if (tab==='home')   setScreen('list');
+    if (tab==='map')    setScreen('walking');
+    if (tab==='coupon') setScreen('wallet');
+    if (tab==='rank')   setScreen('leaderboard');
+  };
+
+  // walk to next waypoint
+  const handleWalk = () => {
+    const nextStep = walkStep + 1;
+    if (nextStep >= WAYPOINTS.length) return;
+    setMoving(true);
+    setTimeout(() => {
+      setMoving(false);
+      setWalkStep(nextStep);
+      // auto-collect item
+      setCollected(c => c.includes(nextStep) ? c : [...c, nextStep]);
+    }, 1600);
+  };
+
+  const handleMonsterEncounter = () => {
+    const wp = WAYPOINTS[walkStep];
+    if (wp && wp.monster) {
+      setActiveMonster(wp.monster);
+      setScreen('catch');
+    }
+  };
+
+  const handleCaught = (monster) => {
+    setCoupons(p => [...p, { ...monster, uid: Date.now() }]);
+    setActiveMonster(null);
+    setTimeout(() => setScreen('walking'), 700);
+  };
+
+  const handleEscape = (monster) => {
+    setLives(l => Math.max(0, l - 1));
+    setActiveMonster(null);
+    setScreen('walking');
+  };
+
+  const handleMonsterBack = () => {
+    setActiveMonster(null);
+    setScreen('walking');
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center px-4 py-5" style={{background:'#030712'}}>
+      <div className="w-full max-w-5xl mb-4 text-center rounded-xl py-2 border border-slate-800"
+        style={{background:'#0f172a'}}>
+        <span className="text-slate-500 text-sm">🚀 Hackathon Demo — </span>
+        <span className="text-cyan-400 font-bold text-sm">Retail AR Navigation</span>
+        <span className="text-slate-500 text-sm"> · RouteDee</span>
+      </div>
+
+      <div className="flex gap-2 mb-6 p-1 rounded-2xl border border-slate-800" style={{background:'#0f172a'}}>
+        {[
+          {id:'customer',label:'📱 Customer App',   grad:'from-emerald-600 to-cyan-600'},
+          {id:'brand',   label:'📊 Brand Dashboard',grad:'from-blue-700 to-indigo-700'},
+        ].map(v=>(
+          <button key={v.id} onClick={()=>setView(v.id)}
+            className={`px-6 py-2 rounded-xl font-semibold text-sm transition-all
+              ${view===v.id?`bg-gradient-to-r ${v.grad} text-white shadow-lg`:'text-slate-400 hover:text-white'}`}>
+            {v.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── CUSTOMER ── */}
+      {view==='customer' && (
+        <div style={{width:360}}>
+          <div className="rounded-[38px] border-4 border-slate-700 shadow-2xl overflow-hidden flex flex-col"
+            style={{background:'#080c1a',height:680}}>
+
+            {/* status bar */}
+            <div className="flex justify-between items-center px-5 py-2 bg-black/60 shrink-0">
+              <span className="text-white text-xs font-semibold">9:41</span>
+              <div className="text-base leading-none">{'❤️'.repeat(lives)}{'🖤'.repeat(5-lives)}</div>
+              <span className="text-white text-xs">📶 🔋</span>
+            </div>
+
+            {/* app header */}
+            <div className="shrink-0 flex items-center justify-between px-4 py-2.5"
+              style={{background:'linear-gradient(135deg,#065f46,#0e7490)'}}>
+              <div>
+                <div className="text-white font-black text-base leading-none">🛒 RouteDee</div>
+                <div className="text-emerald-200 text-xs mt-0.5">{coupons.length} คูปองจับได้</div>
+              </div>
+              <div className="text-right">
+                <div className="text-yellow-300 text-xs font-semibold">⏱ ชีวิตถัดไปใน 18:32</div>
+                <div className="text-emerald-100 text-xs">{collected.length}/{WAYPOINTS.length} รายการ</div>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-hidden">
+
+              {/* SHOPPING LIST */}
+              {screen==='list' && (
+                <div className="h-full overflow-y-auto p-4" style={{background:'#080c1a'}}>
+                  <h2 className="text-white font-bold text-lg mb-0.5">รายการช้อปปิ้ง 🛒</h2>
+                  <p className="text-slate-400 text-xs mb-4">AR จะพาเดินตามเส้นทางที่ optimal ที่สุด</p>
+                  <div className="space-y-2 mb-5">
+                    {WAYPOINTS.map((wp,i)=>(
+                      <div key={i} className="flex items-center gap-3 rounded-2xl p-3 border border-slate-700"
+                        style={{background:'#111827'}}>
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs"
+                          style={{background:'rgba(8,145,178,.2)',border:'1px solid rgba(34,211,238,.3)',color:'#22d3ee'}}>
+                          {wp.label}
+                        </div>
+                        <span className="text-2xl">{wp.item.emoji}</span>
+                        <div className="flex-1">
+                          <div className="text-white font-semibold text-sm">{wp.item.name}</div>
+                          <div className="text-slate-500 text-xs">Zone: {wp.zone}</div>
+                        </div>
+                        {wp.monster && (
+                          <div className="text-xs" style={{color:wp.monster.rc}} title="มีปีศาจ!">
+                            {wp.monster.emoji}
+                          </div>
+                        )}
+                        <span className="text-emerald-400 text-sm">✓</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="rounded-2xl p-3 border border-yellow-700/40 mb-4"
+                    style={{background:'rgba(120,60,0,.12)'}}>
+                    <div className="text-yellow-400 text-xs font-bold mb-1">🗺️ เส้นทางที่วางแผนไว้</div>
+                    <div className="text-slate-300 text-xs">
+                      START → A → B → C → D → E<br/>
+                      ระยะรวมประมาณ 275 เมตร · ~350 ก้าว · ~22 kcal
+                    </div>
+                  </div>
+                  <button onClick={()=>{setScreen('walking');setActiveTab('map');}}
+                    className="w-full py-4 rounded-2xl font-bold text-white text-lg"
+                    style={{background:'linear-gradient(135deg,#059669,#0891b2)',boxShadow:'0 4px 20px rgba(5,150,105,.35)'}}>
+                    🗺️ เริ่มช้อปเลย!
+                  </button>
+                </div>
+              )}
+
+              {/* WALKING */}
+              {screen==='walking' && (
+                <WalkNavigator
+                  stepIdx={walkStep} moving={moving}
+                  collected={collected} coupons={coupons}
+                  lives={lives}
+                  onWalk={handleWalk}
+                  onMonsterEncounter={handleMonsterEncounter}
+                  onFinish={()=>setScreen('summary')}
+                />
+              )}
+
+              {/* MONSTER CATCH */}
+              {screen==='catch' && activeMonster && (
+                <MonsterCatch
+                  monster={activeMonster} lives={lives}
+                  onCaught={handleCaught}
+                  onEscape={handleEscape}
+                  onBack={handleMonsterBack}
+                  onLiveLost={() => setLives(l => Math.max(0, l - 1))}
+                />
+              )}
+
+              {/* SUMMARY */}
+              {screen==='summary' && (
+                <ShoppingSummary
+                  collected={collected} coupons={coupons} lives={lives}
+                  onViewCoupons={()=>{setScreen('wallet');setActiveTab('coupon');}}
+                  onLeaderboard={()=>{setScreen('leaderboard');setActiveTab('rank');}}
+                />
+              )}
+
+              {/* WALLET */}
+              {screen==='wallet' && (
+                <CouponWallet coupons={coupons}
+                  onGoHunt={()=>{setScreen('walking');setActiveTab('map');}}/>
+              )}
+
+              {/* LEADERBOARD */}
+              {screen==='leaderboard' && <Leaderboard/>}
+            </div>
+
+            {/* bottom nav */}
+            <div className="shrink-0 border-t border-slate-800" style={{background:'#080c1a'}}>
+              <div className="flex">
+                {[
+                  {id:'home',   icon:'🏠', label:'หน้าแรก'},
+                  {id:'map',    icon:'🗺️', label:'แผนที่'},
+                  {id:'coupon', icon:'🎫', label:'คูปอง', badge:coupons.length||null},
+                  {id:'rank',   icon:'🏆', label:'อันดับ'},
+                ].map(t=>(
+                  <button key={t.id} onClick={()=>goTab(t.id)}
+                    className={`flex-1 py-2.5 flex flex-col items-center relative transition-all
+                      ${activeTab===t.id?'text-cyan-400':'text-slate-600'}`}>
+                    <span className="text-xl leading-none">{t.icon}</span>
+                    <span className="text-xs mt-0.5 leading-none">{t.label}</span>
+                    {activeTab===t.id&&<div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-0.5"/>}
+                    {t.badge&&(
+                      <span className="absolute top-1.5 right-3 text-xs bg-red-500 text-white
+                        rounded-full w-4 h-4 flex items-center justify-center font-bold leading-none">
+                        {t.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── BRAND ── */}
+      {view==='brand' && (
+        <div className="w-full max-w-5xl"><BrandDashboard/></div>
+      )}
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
