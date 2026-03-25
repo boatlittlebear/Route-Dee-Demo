@@ -42,39 +42,40 @@
 const { useState, useMemo, useRef, useCallback } = React;
 
 /* ══════════════════════════════════════════════════════
-   STORE MAP — Reference floor plan layout
-   ┌─────────────────────────────────────┬──────┐
-   │D│    PRODUCE (veg)     │FROZEN(meat)│      │
-   │A├──────────────────────┴────────────┤ POS  │
-   │I│TOIL1(clean)│TOIL2(beauty)│ promo  │      │
-   │R├────────────────────────────────────┤lanes │
-   │Y│grain│spice│sweet│drink│coffee│bkry│      │
-   │ │(STAPLE-FOOD parallel vertical aisles)     │
-   └─┴─────────────────────────────────────┴──────┘
-   Bottom: main corridor + TROLLEY BAY + ENTRANCE
+   STORE MAP — Demo-style layout (matches reference screenshot)
+   ┌──────────┬──────┬──────────────────────┬──────────┐
+   │ POS/CASH │ DAIRY│   PRODUCE (veg wide)  │FROZEN    │
+   │  (block) │(thin)│                      │(meat)    │
+   ├──────────┴──────┼──────────────────────┴──────────┤
+   │  BAKERY         │ CLEAN│BEAU│GRAIN│SPIC│SWEET│    │
+   │  (left block)   │ ← 5 walk-through aisles →  │    │
+   ├─────────────────┴────────────────────────────┤    │
+   │   DRINK (wide left half)  │  COFFEE (right)  │    │
+   └──────────────────────────────────────────────┘
+   Entrance: bottom-left  Exit: top-left POS area
 ══════════════════════════════════════════════════════ */
 const SVG_W=312, SVG_H=316;
-// Aisle Y center below each row, plus main corridor
-const H_AISLE=[88, 152, 244, 260]; // row0, row1, staple-food, main
-const POS_X=260; // POS right strip start X
-const ENTRANCE={ x:124, y:SVG_H-12 }; // bottom-centre entrance
+// Horizontal aisle Y-centres: row0↔row1, row1↔row2, row2↔main, main
+const H_AISLE=[90, 202, 252, 266];
+const ENTRANCE={ x:40, y:SVG_H-12 };  // bottom-LEFT entrance
+const EXIT_POS = { x:42, y:44 };      // top-LEFT POS checkout
+const POS_BLOCK = { x:4, y:4, w:80, h:82 }; // POS decoration block
 
-/* Zone definitions matching reference image */
 const ZONE_DEFS = {
-  // Row 0 (top): DAIRY strip | PRODUCE | FROZEN+MEAT area
-  fresh:  {rx:4,   ry:4,  rw:22,  rh:80, row:0, bg:'#0d2a12',bd:'#15803d',tc:'#86efac',icon:'🥛',name:'นม/ไข่'},
-  veg:    {rx:30,  ry:4,  rw:118, rh:80, row:0, bg:'#0d2e14',bd:'#166534',tc:'#4ade80',icon:'🥬',name:'ผักผลไม้'},
-  meat:   {rx:152, ry:4,  rw:104, rh:80, row:0, bg:'#3a0b0b',bd:'#991b1b',tc:'#fca5a5',icon:'🥩',name:'เนื้อ/แช่แข็ง'},
-  // Row 1: TOILETERIES — rh=46 leaves 8px gap above+below for visible corridors
-  clean:  {rx:30,  ry:96, rw:62,  rh:46, row:1, bg:'#0a2212',bd:'#007934',tc:'#86efac',icon:'🧺',name:'ของใช้'},
-  beauty: {rx:96,  ry:96, rw:62,  rh:46, row:1, bg:'#2d0514',bd:'#9f1239',tc:'#f9a8d4',icon:'🧴',name:'เครื่องสำอาง'},
-  // Row 2: STAPLE-FOOD — rh=76 leaves 8px gap above+below
-  grain:  {rx:4,   ry:160,rw:38,  rh:76, row:2, bg:'#2a1504',bd:'#92400e',tc:'#fcd34d',icon:'🍚',name:'ข้าว/แป้ง'},
-  spice:  {rx:46,  ry:160,rw:38,  rh:76, row:2, bg:'#1a0e03',bd:'#a16207',tc:'#fbbf24',icon:'🧂',name:'เครื่องปรุง'},
-  sweet:  {rx:88,  ry:160,rw:38,  rh:76, row:2, bg:'#1f0d2e',bd:'#7e22ce',tc:'#e879f9',icon:'🍫',name:'ของหวาน'},
-  drink:  {rx:130, ry:160,rw:38,  rh:76, row:2, bg:'#0d2a16',bd:'#15803d',tc:'#4ade80',icon:'🥤',name:'เครื่องดื่ม'},
-  coffee: {rx:172, ry:160,rw:38,  rh:76, row:2, bg:'#130a03',bd:'#a16207',tc:'#d4a96a',icon:'☕',name:'กาแฟ/ชา'},
-  bakery: {rx:214, ry:160,rw:42,  rh:76, row:2, bg:'#280a03',bd:'#9a3412',tc:'#fdba74',icon:'🍞',name:'เบเกอรี่'},
+  // Row 0: POS area left (decoration) | DAIRY thin | PRODUCE wide | FROZEN/MEAT right
+  fresh:  {rx:88,  ry:4,  rw:18,  rh:78, row:0, bg:'#0d2a12',bd:'#15803d',tc:'#86efac',icon:'🥛',name:'นม/ไข่'},
+  veg:    {rx:110, ry:4,  rw:122, rh:78, row:0, bg:'#0d2e14',bd:'#166534',tc:'#4ade80',icon:'🥬',name:'ผักผลไม้'},
+  meat:   {rx:236, ry:4,  rw:72,  rh:78, row:0, bg:'#3a0b0b',bd:'#991b1b',tc:'#fca5a5',icon:'🥩',name:'เนื้อ/แช่แข็ง'},
+  // Row 1: BAKERY left block + 5 narrow walk-through aisles (open top+bottom)
+  bakery: {rx:4,   ry:96, rw:78,  rh:96, row:1, bg:'#280a03',bd:'#9a3412',tc:'#fdba74',icon:'🍞',name:'เบเกอรี่'},
+  clean:  {rx:86,  ry:96, rw:26,  rh:96, row:1, bg:'#0a2212',bd:'#007934',tc:'#86efac',icon:'🧺',name:'ของใช้'},
+  beauty: {rx:116, ry:96, rw:26,  rh:96, row:1, bg:'#2d0514',bd:'#9f1239',tc:'#f9a8d4',icon:'🧴',name:'เครื่องสำอาง'},
+  grain:  {rx:146, ry:96, rw:26,  rh:96, row:1, bg:'#2a1504',bd:'#92400e',tc:'#fcd34d',icon:'🍚',name:'ข้าว/แป้ง'},
+  spice:  {rx:176, ry:96, rw:26,  rh:96, row:1, bg:'#1a0e03',bd:'#a16207',tc:'#fbbf24',icon:'🧂',name:'เครื่องปรุง'},
+  sweet:  {rx:206, ry:96, rw:26,  rh:96, row:1, bg:'#1f0d2e',bd:'#7e22ce',tc:'#e879f9',icon:'🍫',name:'ของหวาน'},
+  // Row 2: two wide horizontal sections at bottom
+  drink:  {rx:4,   ry:208,rw:118, rh:38, row:2, bg:'#0d2a16',bd:'#15803d',tc:'#4ade80',icon:'🥤',name:'เครื่องดื่ม'},
+  coffee: {rx:126, ry:208,rw:182, rh:38, row:2, bg:'#130a03',bd:'#a16207',tc:'#d4a96a',icon:'☕',name:'กาแฟ/ชา'},
 };
 const ZONES = {};
 Object.entries(ZONE_DEFS).forEach(([id,d])=>{
@@ -96,7 +97,6 @@ Object.entries(ZONE_DEFS).forEach(([id,d])=>{
 
    Result: path walks THROUGH zones (in one end, out the other),
    never backtracks, never cuts through shelves.              ── */
-const EXIT_POS = { x: POS_X-6, y: 44 };
 
 const getNodePos = id => {
   if (id === 'entrance') return {cx:ENTRANCE.x,cy:ENTRANCE.y,topY:H_AISLE[3],bottomY:null,     row:3};
@@ -301,153 +301,118 @@ const buildWaypoints = selectedIds => {
 };
 
 /* ══════════════════════════════════════════════════════
-   STORE MAP SVG — reference floor plan style
+   STORE MAP SVG — demo-style layout matching screenshot
 ══════════════════════════════════════════════════════ */
 const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
-  // segments[0] = entrance→zone0, segments[N] = lastZone→exit
   const segments = useMemo(()=>{
     if(!waypoints.length) return [];
-    const ids = ['entrance', ...waypoints.map(w=>w.zone), 'exit'];
-    return ids.slice(1).map((id,i) => aisleRoute(ids[i], id));
+    const ids = ['entrance',...waypoints.map(w=>w.zone),'exit'];
+    return ids.slice(1).map((id,i)=>aisleRoute(ids[i],id));
   },[waypoints]);
 
   const zoneWpIdx = useMemo(()=>{
-    const m={};
-    waypoints.forEach((w,i)=>{ m[w.zone]=i; });
-    return m;
+    const m={}; waypoints.forEach((w,i)=>{ m[w.zone]=i; }); return m;
   },[waypoints]);
-
-  const posW = SVG_W - POS_X - 4; // POS strip width
-  const posMid = POS_X + posW/2;
 
   return (
     <svg width={SVG_W} height={SVG_H} style={{borderRadius:10,display:'block',maxWidth:'100%'}}>
-      {/* outer bg */}
+      {/* ── FLOOR ── */}
       <rect width={SVG_W} height={SVG_H} fill="#061408"/>
-      {/* store floor */}
-      <rect x={2} y={2} width={SVG_W-4} height={SVG_H-38} rx="8"
-        fill="#0b1f0e" stroke="#1a4025" strokeWidth="1"/>
+      <rect x={2} y={2} width={SVG_W-4} height={SVG_H-34} rx="8"
+        fill="#0b1f0e" stroke="#193520" strokeWidth="1"/>
 
-      {/* ══ WALKING CORRIDORS (horizontal) ══
-          These are the spaces between zone rows — clearly walkable paths.
-          H_AISLE[0]=88 connects row0↔row1 (both rows open to this).
-          H_AISLE[1]=152 connects row1↔row2.
-          H_AISLE[2]=244 connects row2↔main corridor below. */}
+      {/* ── HORIZONTAL CORRIDORS (visible walking paths) ── */}
       {[0,1,2].map(i=>(
-        <rect key={i} x={2} y={H_AISLE[i]-8} width={POS_X-4} height={16}
-          fill="#051208" stroke="#193520" strokeWidth="0.5" opacity="0.95"/>
+        <g key={i}>
+          <rect x={2} y={H_AISLE[i]-8} width={SVG_W-4} height={16}
+            fill="#051208" opacity="0.9"/>
+          <line x1={8} y1={H_AISLE[i]} x2={SVG_W-8} y2={H_AISLE[i]}
+            stroke="#1a4025" strokeWidth="0.7" strokeDasharray="10,6" opacity="0.55"/>
+        </g>
       ))}
-      {/* Corridor centre-line markers */}
-      {[0,1,2].map(i=>(
-        <line key={i} x1={6} y1={H_AISLE[i]} x2={POS_X-6} y2={H_AISLE[i]}
-          stroke="#1a4025" strokeWidth="0.6" strokeDasharray="8,6" opacity="0.5"/>
+      {/* Main corridor + entrance approach */}
+      <rect x={2} y={H_AISLE[3]-6} width={SVG_W-4} height={14}
+        fill="#071d0a" opacity="0.95"/>
+
+      {/* ── VERTICAL GAPS between row-1 aisles ── */}
+      {[84,112,142,172,202,232].map((x,i)=>(
+        <rect key={i} x={x} y={96} width={4} height={96}
+          fill="#051208" opacity="0.85"/>
       ))}
-      {/* Vertical gaps BETWEEN staple-food aisles */}
-      {[44,86,128,170,212].map((x,i)=>(
-        <rect key={i} x={x} y={160} width={4} height={76} fill="#051208" opacity="0.8"/>
+
+      {/* ── POS / CHECKOUT BLOCK (top-left) ── */}
+      <rect x={POS_BLOCK.x} y={POS_BLOCK.y}
+        width={POS_BLOCK.w} height={POS_BLOCK.h} rx="6"
+        fill="#003d1a" stroke="#007934" strokeWidth="2"/>
+      {/* checkout lane lines inside POS block */}
+      {[20,34,48,62,76].map((y,i)=>(
+        <line key={i} x1={POS_BLOCK.x+6} y1={POS_BLOCK.y+y}
+          x2={POS_BLOCK.x+POS_BLOCK.w-6} y2={POS_BLOCK.y+y}
+          stroke="#007934" strokeWidth="1" opacity="0.5"/>
       ))}
-      {/* Main corridor */}
-      <rect x={2} y={H_AISLE[2]+10} width={SVG_W-4} height={18} fill="#071d0a" opacity="0.95"/>
-      <rect x={2} y={H_AISLE[3]-4}  width={SVG_W-4} height={12} fill="#061408" opacity="0.9"/>
-      {/* Left-wall vertical corridor label */}
-      <rect x={0} y={H_AISLE[0]} width={3} height={H_AISLE[2]-H_AISLE[0]}
-        fill="#007934" opacity="0.25"/>
+      <text x={POS_BLOCK.x+POS_BLOCK.w/2} y={POS_BLOCK.y+34}
+        textAnchor="middle" fontSize="22">🏪</text>
+      <text x={POS_BLOCK.x+POS_BLOCK.w/2} y={POS_BLOCK.y+52}
+        textAnchor="middle" fill="#4ade80" fontSize="8" fontWeight="800">CASHIER</text>
+      <text x={POS_BLOCK.x+POS_BLOCK.w/2} y={POS_BLOCK.y+64}
+        textAnchor="middle" fill="#4ade80" fontSize="7">POS / EXIT →</text>
 
-      {/* ── HOT OFFER promo area in row1 right side ── */}
-      <rect x={162} y={96} width={94} height={46} rx="4"
-        fill="#1a0800" stroke="#92400e" strokeWidth="1" strokeDasharray="3,2" opacity="0.8"/>
-      <text x={209} y={118} textAnchor="middle" fontSize="9" fill="#f59e0b" fontWeight="700">🔥 HOT OFFER</text>
-      <text x={209} y={131} textAnchor="middle" fontSize="7" fill="#d97706">โปรโมชั่นพิเศษ</text>
-      <text x={209} y={142} textAnchor="middle" fontSize="8" fill="#fcd34d">ลด 10–50%</text>
-
-      {/* ── TROLLEY BAY corners ── */}
-      <rect x={2} y={H_AISLE[2]+20} width={52} height={32} rx="3"
-        fill="#071508" stroke="#1a4025" strokeWidth="1" opacity="0.9"/>
-      <text x={28} y={H_AISLE[2]+32} textAnchor="middle" fontSize="7" fill="#2d5a35" fontWeight="600">TROLLEY</text>
-      <text x={28} y={H_AISLE[2]+42} textAnchor="middle" fontSize="7" fill="#2d5a35">BAY 🛒</text>
-      <rect x={198} y={H_AISLE[2]+20} width={52} height={32} rx="3"
-        fill="#071508" stroke="#1a4025" strokeWidth="1" opacity="0.9"/>
-      <text x={224} y={H_AISLE[2]+32} textAnchor="middle" fontSize="7" fill="#2d5a35" fontWeight="600">TROLLEY</text>
-      <text x={224} y={H_AISLE[2]+42} textAnchor="middle" fontSize="7" fill="#2d5a35">BAY 🛒</text>
-
-      {/* ── POS / CHECKOUT — full right strip ── */}
-      <rect x={POS_X} y={2} width={posW} height={SVG_H-40} rx="5"
-        fill="#0a1a0d" stroke="#1a4025" strokeWidth="1.5" strokeDasharray="4,3"/>
-      <text x={posMid} y={26} textAnchor="middle" fontSize="18">🏪</text>
-      <text x={posMid} y={40} textAnchor="middle" fill="#4ade80" fontSize="7" fontWeight="700">POS</text>
-      {/* checkout lane lines */}
-      {[52,68,84,100,116,132,148,164,180,196,212,228].map((y,i)=>(
-        <line key={i} x1={POS_X+3} y1={y} x2={SVG_W-6} y2={y}
-          stroke="#1e4025" strokeWidth="0.8" opacity="0.7"/>
-      ))}
-      {/* exit arrow */}
-      <text x={posMid} y={SVG_H-44} textAnchor="middle" fontSize="12" fill="#4ade80">→</text>
-      <text x={posMid} y={SVG_H-34} textAnchor="middle" fontSize="6" fill="#2d5a35">EXIT</text>
-
-      {/* ── ZONE BLOCKS ──
-          Shelves are drawn with OPEN TOP/BOTTOM ends (dashed = walkable)
-          and SOLID LEFT/RIGHT walls (shelves you can't cross).
-          This matches the routing logic: enter/exit from top or bottom. */}
+      {/* ── ZONE BLOCKS ── */}
       {Object.values(ZONES).map(z=>{
         const wpIdx = zoneWpIdx[z.id];
         const inRoute = wpIdx !== undefined;
         const done = inRoute && collected.includes(wpIdx);
         const active = wpIdx === stepIdx;
-        const isDairy = z.id === 'fresh';
-        const wallColor = active ? '#ffd700' : done ? '#10b981' : z.bd;
-        const wallW = active || done ? 2 : 1.5;
-        const op = inRoute ? 1 : 0.72;
-        // row 0 has no top aisle (store wall), rows 1-2 have open top
-        const openTop    = z.row > 0;
-        // all zones have an open bottom (corridor below)
-        const openBottom = true;
+        const isDairy = z.id==='fresh';
+        const isNarrow = z.rw < 40; // narrow walk-through aisles (row 1 center)
+        const wallColor = active?'#ffd700':done?'#10b981':z.bd;
+        const wallW = active||done ? 2 : 1.5;
+
         return (
-          <g key={z.id} opacity={op}>
-            {/* Zone fill — no stroke, just background */}
+          <g key={z.id} opacity={inRoute?1:0.72}>
+            {/* Fill */}
             <rect x={z.rx} y={z.ry} width={z.rw} height={z.rh} fill={z.bg}/>
 
-            {/* ── SHELF LINES inside zone ──
-                Row 2 (vertical aisles): horizontal shelf lines
-                Row 0-1 (open areas):   vertical section dividers */}
-            {z.row === 2
-              ? [0.22,0.44,0.66,0.88].map((r,si)=>(
-                  <line key={si}
-                    x1={z.rx+3} y1={z.ry+z.rh*r} x2={z.rx+z.rw-3} y2={z.ry+z.rh*r}
-                    stroke={z.bd} strokeWidth="1.2" opacity="0.4"/>
+            {/* Shelf lines:
+                narrow row-1 aisles → horizontal (cross-shelf lines)
+                wide zones → vertical section dividers */}
+            {isNarrow
+              ? [0.2,0.4,0.6,0.8].map((r,si)=>(
+                  <line key={si} x1={z.rx+3} y1={z.ry+z.rh*r}
+                    x2={z.rx+z.rw-3} y2={z.ry+z.rh*r}
+                    stroke={z.bd} strokeWidth="1.2" opacity="0.45"/>
                 ))
               : !isDairy && [0.33,0.67].map((r,si)=>(
-                  <line key={si}
-                    x1={z.rx+z.rw*r} y1={z.ry+4} x2={z.rx+z.rw*r} y2={z.ry+z.rh-4}
+                  <line key={si} x1={z.rx+z.rw*r} y1={z.ry+5}
+                    x2={z.rx+z.rw*r} y2={z.ry+z.rh-5}
                     stroke={z.bd} strokeWidth="0.8" opacity="0.3"/>
                 ))
             }
 
-            {/* ── WALLS: left + right (solid — can't walk through) ── */}
+            {/* LEFT and RIGHT walls (solid — can't walk through) */}
             <line x1={z.rx}      y1={z.ry} x2={z.rx}      y2={z.ry+z.rh}
               stroke={wallColor} strokeWidth={wallW}/>
             <line x1={z.rx+z.rw} y1={z.ry} x2={z.rx+z.rw} y2={z.ry+z.rh}
               stroke={wallColor} strokeWidth={wallW}/>
 
-            {/* ── TOP edge: solid if store wall (row 0), open/dashed if walkway ── */}
-            {openTop
+            {/* TOP edge: solid wall for row 0, dashed/open for rows 1-2 */}
+            {z.row===0
               ? <line x1={z.rx} y1={z.ry} x2={z.rx+z.rw} y2={z.ry}
-                  stroke={z.tc} strokeWidth="1" strokeDasharray="4,3" opacity="0.35"/>
-              : <line x1={z.rx} y1={z.ry} x2={z.rx+z.rw} y2={z.ry}
                   stroke={wallColor} strokeWidth={wallW}/>
+              : <line x1={z.rx} y1={z.ry} x2={z.rx+z.rw} y2={z.ry}
+                  stroke={z.tc} strokeWidth="1" strokeDasharray="4,3" opacity="0.4"/>
             }
-            {/* ── BOTTOM edge: always open/dashed (walkway below all zones) ── */}
+            {/* BOTTOM edge: always dashed/open */}
             <line x1={z.rx} y1={z.ry+z.rh} x2={z.rx+z.rw} y2={z.ry+z.rh}
-              stroke={z.tc} strokeWidth="1" strokeDasharray="4,3" opacity="0.35"/>
+              stroke={z.tc} strokeWidth="1" strokeDasharray="4,3" opacity="0.4"/>
 
-            {/* ── WALKWAY gap indicators (▲▼ at open ends) ── */}
-            {openTop && (
-              <text x={z.cx} y={z.ry+6} textAnchor="middle"
-                fill={z.tc} fontSize="5" opacity="0.45">▲</text>
-            )}
+            {/* Walkway arrow indicators */}
+            {z.row>0 && <text x={z.cx} y={z.ry+6} textAnchor="middle"
+              fill={z.tc} fontSize="5" opacity="0.4">▲</text>}
             <text x={z.cx} y={z.ry+z.rh-1} textAnchor="middle"
-              fill={z.tc} fontSize="5" opacity="0.45">▼</text>
+              fill={z.tc} fontSize="5" opacity="0.4">▼</text>
 
-            {/* ── CONTENT ── */}
+            {/* Content */}
             {isDairy ? (
               <>
                 <text x={z.cx} y={z.ry+26} textAnchor="middle" fontSize="10">{z.icon}</text>
@@ -458,37 +423,39 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
               </>
             ) : (
               <>
-                <text x={z.cx} y={z.ry+18} textAnchor="middle" fontSize="12">{z.icon}</text>
-                <text x={z.cx} y={z.ry+30} textAnchor="middle" fill={z.tc}
-                  fontSize={z.rw<44?'6':'7'} fontWeight="600">{z.name}</text>
+                <text x={z.cx} y={z.ry+(isNarrow?22:20)} textAnchor="middle"
+                  fontSize={isNarrow?12:13}>{z.icon}</text>
+                <text x={z.cx} y={z.ry+(isNarrow?34:32)} textAnchor="middle"
+                  fill={z.tc} fontSize={isNarrow?'6':'7'} fontWeight="600">{z.name}</text>
                 {inRoute && !done && (
                   <>
-                    <rect x={z.cx-11} y={z.ry+34} width="22" height="11" rx="5"
+                    <rect x={z.cx-11} y={z.ry+(isNarrow?38:36)} width="22" height="11" rx="5"
                       fill={active?'#007934':'rgba(255,255,255,.1)'}/>
-                    <text x={z.cx} y={z.ry+42} textAnchor="middle"
+                    <text x={z.cx} y={z.ry+(isNarrow?46:44)} textAnchor="middle"
                       fill="white" fontSize="7" fontWeight="700">
                       {waypoints[wpIdx].items.length}ชิ้น
                     </text>
                   </>
                 )}
-                {done && (
-                  <text x={z.cx} y={z.ry+43} textAnchor="middle" fill="#4ade80" fontSize="9">✓</text>
-                )}
+                {done && <text x={z.cx} y={z.ry+(isNarrow?49:47)} textAnchor="middle"
+                  fill="#4ade80" fontSize="9">✓</text>}
               </>
             )}
 
-            {/* waypoint label badge (top-left corner) */}
+            {/* Waypoint badge */}
             {inRoute && (
               <g>
                 <circle cx={z.rx+(isDairy?z.rw/2:7)} cy={z.ry+7} r="7"
                   fill={done?'#059669':active?'#007934':'#1a4025'}
                   stroke={done?'#4ade80':active?'#ffd700':'#1e4025'}
                   strokeWidth="1"/>
-                <text x={z.rx+(isDairy?z.rw/2:7)} y={z.ry+11} textAnchor="middle" fill="white"
-                  fontSize="7" fontWeight="900">{waypoints[wpIdx].label}</text>
+                <text x={z.rx+(isDairy?z.rw/2:7)} y={z.ry+11}
+                  textAnchor="middle" fill="white" fontSize="7" fontWeight="900">
+                  {waypoints[wpIdx].label}
+                </text>
               </g>
             )}
-            {/* monster glow badge (top-right, skip for dairy) */}
+            {/* Monster glow */}
             {!isDairy && inRoute && !done && ZONE_MONSTERS[z.id] && (
               <>
                 <circle cx={z.rx+z.rw-8} cy={z.ry+8} r="10" fill="rgba(255,215,0,.08)">
@@ -504,9 +471,9 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
                 </text>
               </>
             )}
-            {/* active pulse ring */}
+            {/* Active pulse */}
             {active && (
-              <rect x={z.rx-2} y={z.ry-2} width={z.rw+4} height={z.rh+4} rx="7"
+              <rect x={z.rx-2} y={z.ry-2} width={z.rw+4} height={z.rh+4} rx="6"
                 fill="none" stroke="#ffd700" strokeWidth="2" opacity="0.7">
                 <animate attributeName="opacity" values=".7;.2;.7" dur="1.2s" repeatCount="indefinite"/>
               </rect>
@@ -515,40 +482,39 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
         );
       })}
 
-      {/* ── ROUTE SEGMENTS ── */}
+      {/* ── ROUTE SEGMENTS (yellow dashed path) ── */}
       {segments.map((seg,i)=>{
         const done = stepIdx >= i;
         return (
           <polyline key={i}
             points={seg.map(p=>p.join(',')).join(' ')}
             fill="none" stroke="#ffd700"
-            strokeWidth={done?2.8:1.4}
+            strokeWidth={done?3:1.6}
             strokeLinecap="round" strokeLinejoin="round"
-            strokeDasharray={done?'none':'6,5'}
-            opacity={done?0.85:0.18}
+            strokeDasharray={done?'none':'8,6'}
+            opacity={done?0.9:0.22}
             className={done?'ani-route':undefined}
           />
         );
       })}
 
-      {/* ── ENTRANCE / EXIT bar ── */}
-      <rect x={58} y={H_AISLE[3]+8} width={140} height={18} rx="6"
-        fill="rgba(5,150,105,.18)" stroke="#059669" strokeWidth="1"/>
-      <text x={128} y={H_AISLE[3]+20} textAnchor="middle" fill="#4ade80"
-        fontSize="8" fontWeight="700">⬆ ทางเข้า / ออก</text>
-      <line x1={ENTRANCE.x} y1={H_AISLE[3]+26} x2={ENTRANCE.x} y2={ENTRANCE.y-5}
-        stroke="#059669" strokeWidth="1.5" strokeDasharray="3,2" opacity="0.5"/>
+      {/* ── ENTRANCE (bottom-left) ── */}
+      <polygon points={`${ENTRANCE.x-10},${ENTRANCE.y+2} ${ENTRANCE.x+10},${ENTRANCE.y+2} ${ENTRANCE.x},${ENTRANCE.y-12}`}
+        fill="#007934" opacity="0.7"/>
+      <rect x={ENTRANCE.x-7} y={ENTRANCE.y-4} width={14} height={8} rx="2"
+        fill="#004d1f"/>
+      <text x={ENTRANCE.x} y={ENTRANCE.y+14} textAnchor="middle"
+        fill="#4ade80" fontSize="7" fontWeight="600">ทางเข้า</text>
+      <line x1={ENTRANCE.x} y1={H_AISLE[3]+8} x2={ENTRANCE.x} y2={ENTRANCE.y-14}
+        stroke="#007934" strokeWidth="1.2" strokeDasharray="3,3" opacity="0.4"/>
 
       {/* ── USER DOT ── */}
-      <g style={{
-        transform:`translate(${userPos.x}px,${userPos.y}px)`,
-        transition:'transform 0.32s linear'
-      }}>
-        <circle r="10" fill="#007934" stroke="white" strokeWidth="2"/>
-        <text y="4" textAnchor="middle" fontSize="10">🧑</text>
+      <g style={{transform:`translate(${userPos.x}px,${userPos.y}px)`,transition:'transform 0.32s linear'}}>
+        <circle r="10" fill="#007934" stroke="white" strokeWidth="2.5"/>
+        <text y="4" textAnchor="middle" fontSize="11">🧑</text>
       </g>
 
-      <text x={SVG_W-4} y={SVG_H-2} textAnchor="end" fill="#4a7c54" fontSize="7">
+      <text x={SVG_W-4} y={SVG_H-3} textAnchor="end" fill="#4a7c54" fontSize="7">
         RouteDee Smart Route™
       </text>
     </svg>
@@ -941,7 +907,7 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
           {waypoints.map((wp,i)=>(
             <React.Fragment key={i}>
               <span className="text-gray-700 text-xs">→</span>
-              <div className="text-center">
+              <div className="text-c4867enter">
                 <div className="text-xs font-bold px-2 py-0.5 rounded-lg border border-emerald-600 text-emerald-300"
                   style={{background:'rgba(5,150,105,.15)'}}>
                   {wp.label} {wp.items.map(p=>p.emoji).join('')}
