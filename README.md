@@ -1,6 +1,8 @@
 # RouteDee — Smart Route Demo
 
-A mobile-first demo app for **RouteDee**, a smart in-store navigation product that calculates the shortest shopping route, lets users hunt deal monsters, collect coupons, and view brand analytics. Built as a single HTML file using React 18, Tailwind CSS, and Babel (all CDN — no build step required).
+A mobile-first demo app for **RouteDee**, a smart in-store navigation product that calculates the shortest shopping route, lets users hunt deal monsters, collect coupons, scan shelves with AI, and view brand analytics. Built as a single HTML file using React 18, Tailwind CSS, and Babel (all CDN — no build step required).
+
+**Live demo:** https://boatlittlebear.github.io/Route-Dee-Demo/
 
 ---
 
@@ -50,6 +52,9 @@ Wallet of caught coupons with discount value, brand, expiry date, and a "Use" bu
 
 ### 4. Ranking (`rank`)
 Monthly leaderboard ranked by total savings. Shows top 3 with prize tiers (฿500/฿300/฿100 coupons), ranks 4–10, and the current user's position with how much more to save to rank up.
+
+### 5. Shelf Scanner (`camera`)
+CV-simulated shelf scanner. Points camera at a shelf to detect products. Shows detected items with bounding boxes, confidence scores, and price tags. Detected items can be added directly to the shopping list.
 
 ---
 
@@ -168,6 +173,7 @@ Mini-game: 3 attempts (hearts), each throw has random success chance. Caught mon
 | `CouponWallet` | List of caught coupons |
 | `LeaderBoard` | Monthly savings ranking |
 | `BrandDashboard` | Brand analytics dashboard (home screen) |
+| `ShelfScanner` | CV-simulated shelf scanner with bounding box overlay and product detection |
 
 ### State Management
 
@@ -222,7 +228,7 @@ Dark green / black background (`#050f07`) — Lotus supermarket brand colors.
 ## File Structure
 
 ```
-demo.html          ← entire app (single file, ~1400 lines)
+demo.html          ← entire app (single file, ~2000 lines)
 README.md          ← this file
 ```
 
@@ -231,6 +237,9 @@ README.md          ← this file
 ## Git History Summary
 
 ```
+e191d8f  fix: add useEffect to React hooks destructuring in ShelfScanner
+a1f4278  feat: AR monster catch + CV shelf scanner simulation
+270bdf0  docs: add comprehensive README for AI context and project overview
 4eb6cd4  feat: translate all UI text from Thai to English
 b3f468d  style: change font from Kanit to Inter
 45490b1  feat: store map matches reference floor plan
@@ -258,3 +267,5 @@ df38530  feat: realistic store map layout + 77 products
 - **All UI is in English** — previous versions had Thai text.
 - **฿ (Thai Baht) currency symbol** is intentional — this is a Thai retail product demo.
 - The `VCORR=2` left-wall corridor is important — it is kept clear of all zone blocks on purpose to allow vertical routing between non-adjacent rows.
+- **ShelfScanner uses simulated CV** — no real camera API, uses `setInterval` to fake detection frames with randomized bounding boxes and confidence scores.
+- **Hosted on GitHub Pages** at https://boatlittlebear.github.io/Route-Dee-Demo/ — auto-deploys from `main` branch root.
