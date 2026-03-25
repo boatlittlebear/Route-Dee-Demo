@@ -30,13 +30,13 @@
     .ani-tag-in    { animation:tag-in .22s cubic-bezier(.34,1.56,.64,1) forwards }
     .ani-route     { stroke-dasharray:1200; animation:route-draw 1.8s ease-out forwards }
     .glow-gold  { text-shadow:0 0 12px #ffd700,0 0 24px #ffd700 }
-    .glow-cyan  { text-shadow:0 0 10px #22d3ee,0 0 22px #22d3ee }
+    .glow-yellow  { text-shadow:0 0 10px #ffd700,0 0 22px #ffd700 }
     ::-webkit-scrollbar { width:3px }
     ::-webkit-scrollbar-track { background:transparent }
-    ::-webkit-scrollbar-thumb { background:#334155; border-radius:2px }
+    ::-webkit-scrollbar-thumb { background:#1e4025; border-radius:2px }
   </style>
 </head>
-<body style="background:#030712;margin:0">
+<body style="background:#050f07;margin:0">
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useMemo, useRef, useCallback } = React;
@@ -59,15 +59,15 @@ const ENTRANCE={ x:COL_CX[1], y:SVG_H-8 }; // (156,354)
 
 /* Zone definitions */
 const ZONE_DEFS = {
-  veg:    {col:0,row:0,bg:'#0d3320',bd:'#166534',tc:'#4ade80',icon:'🥬',name:'ผักผลไม้'},
-  fresh:  {col:1,row:0,bg:'#0e2554',bd:'#1d4ed8',tc:'#93c5fd',icon:'🥛',name:'ของสด/นม'},
-  meat:   {col:2,row:0,bg:'#4a0e0e',bd:'#991b1b',tc:'#fca5a5',icon:'🥩',name:'เนื้อสัตว์'},
-  grain:  {col:0,row:1,bg:'#3b1a05',bd:'#92400e',tc:'#fcd34d',icon:'🍚',name:'ข้าว/แป้ง'},
-  spice:  {col:1,row:1,bg:'#1f0f02',bd:'#713f12',tc:'#d97706',icon:'🧂',name:'เครื่องปรุง'},
-  sweet:  {col:2,row:1,bg:'#2d0a3b',bd:'#7e22ce',tc:'#e879f9',icon:'🍫',name:'ของหวาน'},
-  drink:  {col:0,row:2,bg:'#0a1a3b',bd:'#1e40af',tc:'#7dd3fc',icon:'🥤',name:'เครื่องดื่ม'},
-  coffee: {col:1,row:2,bg:'#130a03',bd:'#92400e',tc:'#d4a96a',icon:'☕',name:'กาแฟ/ชา'},
-  clean:  {col:2,row:2,bg:'#072030',bd:'#0369a1',tc:'#38bdf8',icon:'🧺',name:'ของใช้'},
+  veg:    {col:0,row:0,bg:'#0d2e14',bd:'#166534',tc:'#4ade80',icon:'🥬',name:'ผักผลไม้'},
+  fresh:  {col:1,row:0,bg:'#0d2a12',bd:'#15803d',tc:'#86efac',icon:'🥛',name:'ของสด/นม'},
+  meat:   {col:2,row:0,bg:'#3a0b0b',bd:'#991b1b',tc:'#fca5a5',icon:'🥩',name:'เนื้อสัตว์'},
+  grain:  {col:0,row:1,bg:'#2a1504',bd:'#92400e',tc:'#fcd34d',icon:'🍚',name:'ข้าว/แป้ง'},
+  spice:  {col:1,row:1,bg:'#1a0e03',bd:'#a16207',tc:'#fbbf24',icon:'🧂',name:'เครื่องปรุง'},
+  sweet:  {col:2,row:1,bg:'#1f0d2e',bd:'#7e22ce',tc:'#e879f9',icon:'🍫',name:'ของหวาน'},
+  drink:  {col:0,row:2,bg:'#0d2a16',bd:'#15803d',tc:'#4ade80',icon:'🥤',name:'เครื่องดื่ม'},
+  coffee: {col:1,row:2,bg:'#130a03',bd:'#a16207',tc:'#d4a96a',icon:'☕',name:'กาแฟ/ชา'},
+  clean:  {col:2,row:2,bg:'#0a2212',bd:'#007934',tc:'#86efac',icon:'🧺',name:'ของใช้'},
   beauty: {col:0,row:3,bg:'#2d0514',bd:'#9f1239',tc:'#f9a8d4',icon:'🧴',name:'เครื่องสำอาง'},
   bakery: {col:1,row:3,bg:'#280a03',bd:'#9a3412',tc:'#fdba74',icon:'🍞',name:'เบเกอรี่'},
 };
@@ -236,23 +236,23 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
   return (
     <svg width={SVG_W} height={SVG_H} style={{borderRadius:10,display:'block',maxWidth:'100%'}}>
       {/* bg */}
-      <rect width={SVG_W} height={SVG_H} fill="#0b1120"/>
+      <rect width={SVG_W} height={SVG_H} fill="#061408"/>
       <rect x={ML} y={MT} width={SVG_W-2*ML} height={ROW_Y[3]+CH-MT} rx="8"
-        fill="#111827" stroke="#1e2d40" strokeWidth="1"/>
+        fill="#0b1f0e" stroke="#1a4025" strokeWidth="1"/>
 
       {/* horizontal aisles */}
       {[0,1,2].map(i=>(
         <rect key={i} x={ML} y={ROW_Y[i]+CH} width={SVG_W-2*ML} height={HG}
-          fill="#0d1625" stroke="none"/>
+          fill="#081a0b" stroke="none"/>
       ))}
       {/* main corridor */}
       <rect x={ML} y={ROW_Y[3]+CH} width={SVG_W-2*ML} height={HG}
-        fill="#0a1420" stroke="none"/>
+        fill="#071d0a" stroke="none"/>
 
       {/* vertical aisles */}
       {[1,2].map(c=>(
         <rect key={c} x={COL_X[c]-VG} y={MT} width={VG} height={ROW_Y[3]+CH-MT}
-          fill="#0d1625"/>
+          fill="#081a0b"/>
       ))}
 
       {/* aisle direction arrows */}
@@ -260,7 +260,7 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
         const y=H_AISLE[i];
         return [1,2,3].map(x=>(
           <text key={x} x={x===1?COL_CX[0]:x===2?COL_CX[1]:COL_CX[2]}
-            y={y+4} textAnchor="middle" fill="#1e3a5f" fontSize="9">→</text>
+            y={y+4} textAnchor="middle" fill="#2d5a35" fontSize="9">→</text>
         ));
       })}
 
@@ -273,7 +273,7 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
         return (
           <g key={z.id}>
             <rect x={z.rx} y={z.ry} width={CW} height={CH} rx="6"
-              fill={z.bg} stroke={active?'#22d3ee':done?'#10b981':z.bd}
+              fill={z.bg} stroke={active?'#ffd700':done?'#10b981':z.bd}
               strokeWidth={active||done?2:1.5}
               opacity={inRoute?1:0.75}/>
             {/* shelf lines */}
@@ -290,7 +290,7 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
             {inRoute && !done && (
               <>
                 <rect x={z.cx-12} y={z.ry+42} width="24" height="12" rx="6"
-                  fill={active?'#0891b2':'rgba(255,255,255,.1)'}/>
+                  fill={active?'#007934':'rgba(255,255,255,.1)'}/>
                 <text x={z.cx} y={z.ry+51} textAnchor="middle" fill="white" fontSize="7.5" fontWeight="700">
                   {waypoints[wpIdx].items.length}ชิ้น
                 </text>
@@ -304,8 +304,8 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
             {inRoute && (
               <g>
                 <circle cx={z.rx+7} cy={z.ry+7} r="7"
-                  fill={done?'#059669':active?'#0891b2':'#1e3a5f'}
-                  stroke={done?'#4ade80':active?'#22d3ee':'#334155'}
+                  fill={done?'#059669':active?'#007934':'#1a4025'}
+                  stroke={done?'#4ade80':active?'#ffd700':'#1e4025'}
                   strokeWidth="1"/>
                 <text x={z.rx+7} y={z.ry+11} textAnchor="middle" fill="white"
                   fontSize="7" fontWeight="900">{waypoints[wpIdx].label}</text>
@@ -330,7 +330,7 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
             {/* active pulse ring */}
             {active && (
               <rect x={z.rx-2} y={z.ry-2} width={CW+4} height={CH+4} rx="8"
-                fill="none" stroke="#22d3ee" strokeWidth="2" opacity="0.7">
+                fill="none" stroke="#ffd700" strokeWidth="2" opacity="0.7">
                 <animate attributeName="opacity" values=".7;.2;.7" dur="1.2s" repeatCount="indefinite"/>
               </rect>
             )}
@@ -340,10 +340,10 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
 
       {/* CHECKOUT (col2 row3) */}
       <rect x={COL_X[2]} y={ROW_Y[3]} width={CW} height={CH} rx="6"
-        fill="#111827" stroke="#1e3a5f" strokeWidth="1" strokeDasharray="4,3"/>
+        fill="#0e1f11" stroke="#1a4025" strokeWidth="1" strokeDasharray="4,3"/>
       <text x={COL_CX[2]} y={ROW_Y[3]+23} textAnchor="middle" fontSize="15">🏪</text>
-      <text x={COL_CX[2]} y={ROW_Y[3]+38} textAnchor="middle" fill="#374151" fontSize="8">แคชเชียร์</text>
-      <text x={COL_CX[2]} y={ROW_Y[3]+50} textAnchor="middle" fill="#1e3a5f" fontSize="7">EXIT →</text>
+      <text x={COL_CX[2]} y={ROW_Y[3]+38} textAnchor="middle" fill="#4a7c54" fontSize="8">แคชเชียร์</text>
+      <text x={COL_CX[2]} y={ROW_Y[3]+50} textAnchor="middle" fill="#4a7c54" fontSize="7">EXIT →</text>
 
       {/* ROUTE SEGMENTS */}
       {segments.map((seg,i)=>{
@@ -352,7 +352,7 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
           <polyline key={i}
             points={seg.map(p=>p.join(',')).join(' ')}
             fill="none"
-            stroke={done?'#22d3ee':'#22d3ee'}
+            stroke={done?'#ffd700':'#ffd700'}
             strokeWidth={done?2.8:1.4}
             strokeLinecap="round" strokeLinejoin="round"
             strokeDasharray={done?'none':'6,5'}
@@ -375,12 +375,12 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
         transform:`translate(${userPos.x}px,${userPos.y}px)`,
         transition:'transform 0.32s linear'
       }}>
-        <circle r="10" fill="#2563eb" stroke="white" strokeWidth="2"/>
+        <circle r="10" fill="#007934" stroke="white" strokeWidth="2"/>
         <text y="4" textAnchor="middle" fontSize="10">🧑</text>
       </g>
 
       {/* distance legend */}
-      <text x={SVG_W-4} y={SVG_H-2} textAnchor="end" fill="#1e3a5f" fontSize="7">
+      <text x={SVG_W-4} y={SVG_H-2} textAnchor="end" fill="#4a7c54" fontSize="7">
         RouteDee Smart Route™
       </text>
     </svg>
@@ -406,20 +406,20 @@ const ProductPicker=({selected,onToggle,onStart})=>{
   const n=selected.size;
 
   return (
-    <div className="h-full flex flex-col" style={{background:'#080c1a'}}>
+    <div className="h-full flex flex-col" style={{background:"#071209"}}>
       <div className="px-3 pt-3 pb-2 shrink-0">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-white font-bold text-sm">🛒 เลือกสินค้า</h2>
           {n>0&&<span className="text-xs font-bold px-2 py-0.5 rounded-full text-white"
-            style={{background:'linear-gradient(135deg,#059669,#0891b2)'}}>เลือกแล้ว {n} ชิ้น</span>}
+            style={{background:'linear-gradient(135deg,#059669,#007934)'}}>เลือกแล้ว {n} ชิ้น</span>}
         </div>
         {/* search */}
         <div className="relative mb-2">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs">🔍</span>
           <input value={q} onChange={e=>setQ(e.target.value)} placeholder="ค้นหาสินค้า..."
             className="w-full pl-7 pr-8 py-1.5 rounded-xl text-xs text-white placeholder-gray-600
-              border border-slate-700 outline-none focus:border-cyan-500"
-            style={{background:'#111827'}}/>
+              border border-green-900 outline-none focus:border-yellow-500"
+            style={{background:'#0e1f11'}}/>
           {q&&<button onClick={()=>setQ('')}
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 text-xs">✕</button>}
         </div>
@@ -429,7 +429,7 @@ const ProductPicker=({selected,onToggle,onStart})=>{
             <button key={c} onClick={()=>setCat(c)}
               className="shrink-0 px-2 py-0.5 rounded-lg text-xs font-semibold transition-all"
               style={{
-                background:cat===c?'linear-gradient(135deg,#0891b2,#6d28d9)':'rgba(255,255,255,.05)',
+                background:cat===c?'linear-gradient(135deg,#007934,#6d28d9)':'rgba(255,255,255,.05)',
                 color:cat===c?'white':'#64748b',
                 border:cat===c?'none':'1px solid #1e3a5f',
               }}>
@@ -470,7 +470,7 @@ const ProductPicker=({selected,onToggle,onStart})=>{
         }
       </div>
 
-      <div className="shrink-0 px-3 pb-3 pt-2 border-t border-slate-800"
+      <div className="shrink-0 px-3 pb-3 pt-2 border-t border-green-900/60"
         style={{background:'rgba(8,12,26,.95)'}}>
         {n>0&&(
           <div className="flex flex-wrap gap-1 mb-2">
@@ -491,7 +491,7 @@ const ProductPicker=({selected,onToggle,onStart})=>{
         <button onClick={n>0?onStart:undefined} disabled={n===0}
           className="w-full py-3 rounded-2xl font-bold text-sm transition-all"
           style={{
-            background:n>0?'linear-gradient(135deg,#059669,#0891b2)':'#1e293b',
+            background:n>0?'linear-gradient(135deg,#059669,#007934)':'#132b16',
             color:n>0?'white':'#475569',
             boxShadow:n>0?'0 4px 18px rgba(5,150,105,.35)':'none',
           }}>
@@ -512,11 +512,11 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
   const totalDist=waypoints.slice(0,Math.max(0,stepIdx+1)).reduce((a,w)=>a+w.dist,0);
 
   return (
-    <div className="h-full overflow-y-auto p-2.5" style={{background:'#080c1a'}}>
+    <div className="h-full overflow-y-auto p-2.5" style={{background:"#071209"}}>
       <div className="flex items-center justify-between mb-1.5">
-        <button onClick={onBack} className="text-slate-600 text-xs underline">← แก้รายการ</button>
+        <button onClick={onBack} className="text-green-600 text-xs underline">← แก้รายการ</button>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-cyan-400 font-semibold">{collected.length}/{waypoints.length} จุด</span>
+          <span className="text-xs text-yellow-400 font-semibold">{collected.length}/{waypoints.length} จุด</span>
           {totalDist>0&&<span className="text-xs text-gray-500">{totalDist}m</span>}
         </div>
       </div>
@@ -527,17 +527,17 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
         {waypoints.map((w,i)=>(
           <React.Fragment key={i}>
             <div className="h-px flex-1 min-w-2 transition-all"
-              style={{background:collected.includes(i)?'#22d3ee':'#1e3a5f',minWidth:8}}/>
+              style={{background:collected.includes(i)?'#ffd700':'#1a4025',minWidth:8}}/>
             <div className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center
               text-xs font-bold border transition-all
               ${collected.includes(i)?'border-emerald-400 bg-emerald-900/60 text-emerald-300':
-                i===stepIdx+1&&!moving?'border-cyan-500 bg-cyan-900/30 text-cyan-300':
-                'border-slate-700 text-slate-600'}`}>
+                i===stepIdx+1&&!moving?'border-yellow-500 bg-yellow-900/20 text-yellow-300':
+                'border-green-900 text-green-600'}`}>
               {collected.includes(i)?'✓':w.label}
             </div>
           </React.Fragment>
         ))}
-        <div className="h-px flex-1 min-w-2" style={{background:'#1e3a5f',minWidth:8}}/>
+        <div className="h-px flex-1 min-w-2" style={{background:'#1a4025',minWidth:8}}/>
         <div className="text-gray-700 text-xs shrink-0 font-mono">OUT</div>
       </div>
 
@@ -549,9 +549,9 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
       <div className="mt-2 space-y-1.5">
         {/* smart route badge (first time) */}
         {stepIdx===-1&&!moving&&(
-          <div className="rounded-xl px-3 py-2 border border-cyan-700/40 text-center"
-            style={{background:'rgba(8,145,178,.1)'}}>
-            <div className="text-cyan-300 text-xs font-semibold">
+          <div className="rounded-xl px-3 py-2 border border-yellow-600/40 text-center"
+            style={{background:'rgba(0,121,52,.12)'}}>
+            <div className="text-yellow-300 text-xs font-semibold">
               🧠 Smart Route คำนวณเส้นทางสั้นสุดแล้ว!
             </div>
             <div className="text-gray-500 text-xs mt-0.5">
@@ -564,15 +564,15 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
         {stepIdx===-1&&!moving&&(
           <button onClick={onWalk}
             className="w-full py-3 rounded-2xl font-bold text-white text-sm"
-            style={{background:'linear-gradient(135deg,#059669,#0891b2)',boxShadow:'0 4px 16px rgba(5,150,105,.35)'}}>
+            style={{background:'linear-gradient(135deg,#059669,#007934)',boxShadow:'0 4px 16px rgba(5,150,105,.35)'}}>
             🚶 เริ่มเดินช้อป!
           </button>
         )}
 
         {moving&&(
-          <div className="rounded-xl p-2.5 border border-cyan-700/50 text-center"
-            style={{background:'rgba(8,145,178,.08)'}}>
-            <div className="text-cyan-300 font-bold text-xs">
+          <div className="rounded-xl p-2.5 border border-yellow-600/50 text-center"
+            style={{background:'rgba(0,121,52,.12)'}}>
+            <div className="text-yellow-300 font-bold text-xs">
               🚶 กำลังเดินไปยัง Zone {waypoints[stepIdx]?.label} — {waypoints[stepIdx]?.zoneName}…
             </div>
           </div>
@@ -595,7 +595,7 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
               <button onClick={onMonster}
                 className="w-full py-2.5 rounded-xl font-bold text-white text-xs"
                 style={{
-                  background:'linear-gradient(135deg,#6d28d9,#db2777)',
+                  background:'linear-gradient(135deg,#007934,#ffc300)',
                   boxShadow:'0 0 16px rgba(109,40,217,.4)',
                   animation:'float 2s ease-in-out infinite',
                 }}>
@@ -606,7 +606,7 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
             {!allDone?(
               <button onClick={onWalk}
                 className="w-full py-2.5 rounded-2xl font-bold text-white text-sm"
-                style={{background:'linear-gradient(135deg,#0891b2,#1d4ed8)'}}>
+                style={{background:'linear-gradient(135deg,#007934,#00843d)'}}>
                 🚶 เดินต่อ → {waypoints[stepIdx+1]?.label} {waypoints[stepIdx+1]?.zoneName}
               </button>
             ):(
@@ -626,7 +626,7 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
             {icon:'📏',v:totalDist,u:'เมตร'},
             {icon:'🔥',v:Math.round(totalDist*0.058),u:'kcal'},
           ].map((s,i)=>(
-            <div key={i} className="flex-1 rounded-xl p-1.5 text-center border border-slate-800"
+            <div key={i} className="flex-1 rounded-xl p-1.5 text-center border border-green-900/60"
               style={{background:'rgba(255,255,255,.03)'}}>
               <div className="text-sm">{s.icon}</div>
               <div className="text-white font-bold text-xs">{s.v}</div>
@@ -656,7 +656,7 @@ const MonsterCatch=({monster,lives,onCaught,onEscape,onLiveLost})=>{
   };
   return (
     <div className="h-full flex flex-col items-center justify-center p-5"
-      style={{background:'linear-gradient(160deg,#12002e,#0d1a4a)'}}>
+      style={{background:'linear-gradient(160deg,#051a09,#093018)'}}>
       {phase!=='success'&&(
         <div className="w-full flex justify-between items-center mb-3">
           <div className="text-xs text-gray-500">ครั้งที่ {attempts+1}</div>
@@ -685,7 +685,7 @@ const MonsterCatch=({monster,lives,onCaught,onEscape,onLiveLost})=>{
         <>
           <button onClick={handleThrow}
             className="w-full py-4 rounded-2xl font-black text-white text-xl mb-2"
-            style={{background:'linear-gradient(135deg,#7c3aed,#db2777)',boxShadow:'0 4px 24px rgba(124,58,237,.5)'}}>
+            style={{background:'linear-gradient(135deg,#007934,#ffc300)',boxShadow:'0 4px 24px rgba(124,58,237,.5)'}}>
             🎯 ขว้าง!
           </button>
           <button onClick={onEscape} className="text-slate-500 text-xs underline">หนีกลับ</button>
@@ -700,7 +700,7 @@ const MonsterCatch=({monster,lives,onCaught,onEscape,onLiveLost})=>{
           <div className="text-red-400 font-bold text-center text-lg">หลุดมือ! 😤 ❤️−1</div>
           <button onClick={()=>setPhase('encounter')}
             className="w-full py-3 rounded-xl text-white font-bold"
-            style={{background:'linear-gradient(135deg,#7c3aed,#db2777)'}}>
+            style={{background:'linear-gradient(135deg,#007934,#ffc300)'}}>
             🎯 ลองอีกครั้ง!
           </button>
           <button onClick={onEscape}
@@ -731,7 +731,7 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
   const saved=coupons.reduce((a,c)=>a+c.discount,0);
   const items=waypoints.reduce((a,w)=>a+w.items.length,0);
   return (
-    <div className="h-full overflow-y-auto" style={{background:'#080c1a'}}>
+    <div className="h-full overflow-y-auto" style={{background:"#071209"}}>
       <div className="px-4 pt-5 pb-3 text-center"
         style={{background:'linear-gradient(180deg,rgba(5,150,105,.2),transparent)'}}>
         <div className="text-5xl mb-1">🏁</div>
@@ -743,7 +743,7 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
       <div className="px-4 mb-3">
         <div className="text-gray-600 text-xs mb-1.5 text-center">เส้นทางที่เดิน (Smart Route)</div>
         <div className="flex items-center justify-center gap-1 flex-wrap">
-          <span className="text-xs text-gray-600 px-1.5 py-0.5 rounded border border-slate-800"
+          <span className="text-xs text-gray-600 px-1.5 py-0.5 rounded border border-green-900/60"
             style={{background:'rgba(255,255,255,.03)'}}>IN</span>
           {waypoints.map((wp,i)=>(
             <React.Fragment key={i}>
@@ -758,7 +758,7 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
             </React.Fragment>
           ))}
           <span className="text-gray-700 text-xs">→</span>
-          <span className="text-xs text-gray-600 px-1.5 py-0.5 rounded border border-slate-800"
+          <span className="text-xs text-gray-600 px-1.5 py-0.5 rounded border border-green-900/60"
             style={{background:'rgba(255,255,255,.03)'}}>OUT</span>
         </div>
       </div>
@@ -767,7 +767,7 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
       <div className="px-4 grid grid-cols-2 gap-2 mb-3">
         {[
           {icon:'🔥',label:'แคลอรี่เผาไหม้',v:kcal,   u:'kcal',f:'#7c2d12',t:'#92400e',g:'rgba(239,68,68,.3)'},
-          {icon:'👟',label:'จำนวนก้าว',      v:steps,  u:'ก้าว', f:'#1e3a5f',t:'#1e40af',g:'rgba(59,130,246,.3)'},
+          {icon:'👟',label:'จำนวนก้าว',      v:steps,  u:'ก้าว', f:'#1a4025',t:'#1e40af',g:'rgba(59,130,246,.3)'},
           {icon:'📏',label:'ระยะทางรวม',     v:dist,   u:'เมตร', f:'#14532d',t:'#065f46',g:'rgba(16,185,129,.3)'},
           {icon:'⏱', label:'ใช้เวลา',         v:'~'+Math.round(dist/60+2)+'นาที',u:'',f:'#312e81',t:'#4c1d95',g:'rgba(139,92,246,.3)'},
         ].map((s,i)=>(
@@ -784,10 +784,10 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
 
       {/* fun fact */}
       <div className="px-4 mb-3">
-        <div className="rounded-xl p-3 border border-slate-800 text-xs text-center"
+        <div className="rounded-xl p-3 border border-green-900/60 text-xs text-center"
           style={{background:'rgba(255,255,255,.03)'}}>
           <span className="text-gray-400">เดินวันนี้เท่ากับ </span>
-          <span className="text-cyan-300 font-bold">ขึ้นลิฟท์ {Math.max(1,Math.round(kcal/7))} ชั้น 🏢</span>
+          <span className="text-yellow-300 font-bold">ขึ้นลิฟท์ {Math.max(1,Math.round(kcal/7))} ชั้น 🏢</span>
           <span className="text-gray-400"> หรือ </span>
           <span className="text-orange-300 font-bold">กิน {Math.max(1,Math.round(kcal/52))} กล้วย 🍌</span>
         </div>
@@ -806,11 +806,11 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
 
       <div className="px-4 pb-4 flex gap-2">
         <button onClick={onViewCoupons} className="flex-1 py-3 rounded-xl text-white font-bold text-sm"
-          style={{background:'linear-gradient(135deg,#059669,#0d9488)'}}>
+          style={{background:'linear-gradient(135deg,#007934,#00a651)'}}>
           🎫 ดูคูปอง ({coupons.length})
         </button>
         <button onClick={onLeaderboard} className="flex-1 py-3 rounded-xl text-white font-bold text-sm"
-          style={{background:'linear-gradient(135deg,#7c3aed,#1d4ed8)'}}>
+          style={{background:'linear-gradient(135deg,#7c3aed,#00843d)'}}>
           🏆 อันดับ
         </button>
       </div>
@@ -837,15 +837,15 @@ const LEADERBOARD=[
 
 const Leaderboard=()=>(
   <div className="h-full overflow-y-auto"
-    style={{background:'linear-gradient(160deg,#12002e 0%,#0d1a4a 55%,#050a1a 100%)'}}>
+    style={{background:'linear-gradient(160deg,#051a09 0%,#093018 55%,#030d06 100%)'}}>
     <div className="sticky top-0 z-10 px-4 pt-5 pb-3 text-center"
-      style={{background:'linear-gradient(160deg,#12002e,#0d1a4a)'}}>
+      style={{background:'linear-gradient(160deg,#051a09,#093018)'}}>
       <div className="text-5xl leading-none mb-1" style={{filter:'drop-shadow(0 0 18px #ffd700)'}}>🏆</div>
       <h2 className="font-black text-xl glow-gold" style={{color:'#ffd700'}}>The Deal Hunter</h2>
-      <p className="text-purple-300 text-xs mt-0.5">สุดยอดนักล่าดีลประจำเดือน มี.ค. 2569</p>
+      <p className="text-green-300 text-xs mt-0.5">สุดยอดนักล่าดีลประจำเดือน มี.ค. 2569</p>
       <div className="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5
-        border border-purple-500/60" style={{background:'rgba(88,28,135,.35)'}}>
-        <span className="text-xs text-purple-300">⏱</span>
+        border border-yellow-600/50" style={{background:'rgba(0,121,52,.3)'}}>
+        <span className="text-xs text-green-300">⏱</span>
         <span className="text-white font-mono text-xs">รีเซ็ตใน <span className="text-yellow-300 font-bold">8วัน 14ชม.</span></span>
       </div>
       <div className="mt-1 text-gray-500 text-xs">วัดจาก 💰 Total Savings</div>
@@ -857,7 +857,7 @@ const Leaderboard=()=>(
           const ph=[52,72,40][ri===0?1:ri===1?0:2];
           const cl={
             0:{c:'#ffd700',bg:'linear-gradient(180deg,#b8860b,#ffd700,#b8860b)',sh:'rgba(255,215,0,.6)',icon:'👑'},
-            1:{c:'#c0c0c0',bg:'linear-gradient(180deg,#64748b,#334155)',sh:'rgba(192,192,192,.35)',icon:'🥈'},
+            1:{c:'#c0c0c0',bg:'linear-gradient(180deg,#64748b,#1e4025)',sh:'rgba(192,192,192,.35)',icon:'🥈'},
             2:{c:'#cd7f32',bg:'linear-gradient(180deg,#92400e,#b45309)',sh:'rgba(205,127,50,.35)',icon:'🥉'},
           }[ri];
           return (
@@ -890,23 +890,23 @@ const Leaderboard=()=>(
       {LEADERBOARD.slice(3).map((p,idx)=>(
         <div key={p.rank}
           className={`rounded-xl px-3 py-2 flex items-center gap-2 border ani-slide-up
-            ${p.isMe?'border-cyan-400 ring-1 ring-cyan-400':'border-white/10'}`}
-          style={{background:p.isMe?'rgba(8,145,178,.18)':'rgba(255,255,255,.04)',animationDelay:`${idx*.05}s`}}>
+            ${p.isMe?'border-yellow-400 ring-1 ring-yellow-400':'border-white/10'}`}
+          style={{background:p.isMe?'rgba(0,121,52,.2)':'rgba(255,255,255,.04)',animationDelay:`${idx*.05}s`}}>
           <div className="w-5 text-center font-bold text-xs text-gray-500">#{p.rank}</div>
           <div className="text-xl leading-none">{p.avatar}</div>
           <div className="flex-1 min-w-0">
-            <div className={`text-xs font-semibold truncate ${p.isMe?'text-cyan-300':'text-white'}`}>
-              {p.name}{p.isMe&&<span className="ml-1 text-cyan-500">← ฉัน</span>}
+            <div className={`text-xs font-semibold truncate ${p.isMe?'text-yellow-300':'text-white'}`}>
+              {p.name}{p.isMe&&<span className="ml-1 text-yellow-500">← ฉัน</span>}
             </div>
           </div>
-          <div className={`font-bold text-sm ${p.isMe?'glow-cyan text-cyan-300':'text-green-400'}`}>
+          <div className={`font-bold text-sm ${p.isMe?'glow-yellow text-yellow-300':'text-green-400'}`}>
             ฿{p.savings.toLocaleString()}
           </div>
         </div>
       ))}
-      <div className="mt-2 rounded-xl p-3 text-center border border-cyan-500/40"
-        style={{background:'linear-gradient(135deg,rgba(8,145,178,.18),rgba(29,78,216,.15))'}}>
-        <div className="text-cyan-300 font-bold text-sm">🎯 ฉัน (อันดับ 7)</div>
+      <div className="mt-2 rounded-xl p-3 text-center border border-yellow-500/40"
+        style={{background:'linear-gradient(135deg,rgba(0,121,52,.2),rgba(29,78,216,.15))'}}>
+        <div className="text-yellow-300 font-bold text-sm">🎯 ฉัน (อันดับ 7)</div>
         <div className="text-white text-xs mt-0.5">
           อีก <span className="text-yellow-300 font-black text-sm">฿52</span> จะขึ้นอันดับ 6!
         </div>
@@ -917,7 +917,7 @@ const Leaderboard=()=>(
 );
 
 const CouponWallet=({coupons,onGoHunt})=>(
-  <div className="h-full overflow-y-auto p-3" style={{background:'#080c1a'}}>
+  <div className="h-full overflow-y-auto p-3" style={{background:"#071209"}}>
     <h2 className="text-white font-bold text-sm mb-3">🎫 กระเป๋าคูปอง</h2>
     {coupons.length===0?(
       <div className="text-center py-16">
@@ -925,7 +925,7 @@ const CouponWallet=({coupons,onGoHunt})=>(
         <div className="text-gray-400 text-sm">ยังไม่มีคูปอง</div>
         <div className="text-gray-600 text-xs mt-1 mb-4">ล่าปีศาจระหว่างช้อป!</div>
         <button onClick={onGoHunt} className="px-5 py-2 rounded-xl text-white font-bold text-sm"
-          style={{background:'linear-gradient(135deg,#0891b2,#6d28d9)'}}>🛒 ไปช้อป</button>
+          style={{background:'linear-gradient(135deg,#007934,#6d28d9)'}}>🛒 ไปช้อป</button>
       </div>
     ):(
       <div className="space-y-2">
@@ -943,7 +943,7 @@ const CouponWallet=({coupons,onGoHunt})=>(
             <div className="flex items-center justify-between">
               <div className="text-gray-500 text-xs">หมดอายุ 31 มี.ค. 2569</div>
               <button className="px-2.5 py-1 rounded-lg text-white font-bold text-xs"
-                style={{background:'linear-gradient(135deg,#059669,#0891b2)'}}>📱 ใช้</button>
+                style={{background:'linear-gradient(135deg,#059669,#007934)'}}>📱 ใช้</button>
             </div>
           </div>
         ))}
@@ -966,24 +966,24 @@ const LineChart=({data,days})=>{
         <stop offset="0%" stopColor="#10b981" stopOpacity=".4"/>
         <stop offset="100%" stopColor="#10b981" stopOpacity="0"/>
       </linearGradient></defs>
-      {[0,.25,.5,.75,1].map((r,i)=><line key={i} x1={p.l} y1={p.t+iH*r} x2={p.l+iW} y2={p.t+iH*r} stroke="#1e3a5f" strokeWidth="1" strokeDasharray="3,3"/>)}
-      {[0,.5,1].map((r,i)=><text key={i} x={p.l-4} y={p.t+iH*(1-r)+4} textAnchor="end" fill="#64748b" fontSize="9">{Math.round(max*r)}</text>)}
+      {[0,.25,.5,.75,1].map((r,i)=><line key={i} x1={p.l} y1={p.t+iH*r} x2={p.l+iW} y2={p.t+iH*r} stroke="#1a4025" strokeWidth="1" strokeDasharray="3,3"/>)}
+      {[0,.5,1].map((r,i)=><text key={i} x={p.l-4} y={p.t+iH*(1-r)+4} textAnchor="end" fill="#4a7c54" fontSize="9">{Math.round(max*r)}</text>)}
       <polygon points={area} fill="url(#lg)"/>
       <polyline points={pp} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      {pts.map((q,i)=><circle key={i} cx={q.x} cy={q.y} r="4" fill="#10b981" stroke="#0f172a" strokeWidth="1.5"/>)}
-      {days.map((d,i)=><text key={i} x={pts[i].x} y={H-6} textAnchor="middle" fill="#64748b" fontSize="9">{d}</text>)}
+      {pts.map((q,i)=><circle key={i} cx={q.x} cy={q.y} r="4" fill="#10b981" stroke="#071d0a" strokeWidth="1.5"/>)}
+      {days.map((d,i)=><text key={i} x={pts[i].x} y={H-6} textAnchor="middle" fill="#4a7c54" fontSize="9">{d}</text>)}
     </svg>
   );
 };
 
 const BrandDashboard=()=>(
-  <div className="rounded-2xl border border-slate-700 p-6"
-    style={{background:'linear-gradient(160deg,#0f172a,#1e293b)'}}>
+  <div className="rounded-2xl border border-green-900 p-6"
+    style={{background:'linear-gradient(160deg,#071d0a,#132b16)'}}>
     <div className="flex items-start justify-between mb-5">
       <div>
         <div className="flex items-center gap-3 mb-1.5">
           <div className="px-3 py-1 rounded-lg font-bold text-sm text-white"
-            style={{background:'linear-gradient(135deg,#1d4ed8,#3b82f6)'}}>RetailAR</div>
+            style={{background:'linear-gradient(135deg,#00843d,#3b82f6)'}}>RetailAR</div>
           <span className="text-slate-400 text-sm">Brand Analytics</span>
         </div>
         <h1 className="text-white font-bold text-xl">📊 Campaign Overview</h1>
@@ -996,10 +996,10 @@ const BrandDashboard=()=>(
     </div>
     <div className="grid grid-cols-4 gap-3 mb-5">
       {[
-        {icon:'🎫',label:'คูปองแจกไป',      value:'1,247',    unit:'ใบ', f:'#1e3a5f',t:'#1e2d5f'},
+        {icon:'🎫',label:'คูปองแจกไป',      value:'1,247',    unit:'ใบ', f:'#1a4025',t:'#1e2d5f'},
         {icon:'✅',label:'Redeem จริง',      value:'498',      unit:'ใบ', f:'#14432a',t:'#0f2e1a',sub:'39.9%',sc:'text-emerald-300'},
         {icon:'📈',label:'ยอดขายเพิ่ม',     value:'+฿124,500',unit:'',  f:'#14532d',t:'#0f3020'},
-        {icon:'🚀',label:'ROI',              value:'4.2×',     unit:'',  f:'#3b0764',t:'#2e1065',sub:'vs ฿30k',sc:'text-purple-300'},
+        {icon:'🚀',label:'ROI',              value:'4.2×',     unit:'',  f:'#3b0764',t:'#2e1065',sub:'vs ฿30k',sc:'text-green-300'},
       ].map((k,i)=>(
         <div key={i} className="rounded-xl p-4 border border-white/10"
           style={{background:`linear-gradient(135deg,${k.f},${k.t})`}}>
@@ -1015,10 +1015,10 @@ const BrandDashboard=()=>(
       ))}
     </div>
     <div className="grid grid-cols-2 gap-4 mb-4">
-      <div className="rounded-xl p-4 border border-slate-700" style={{background:'#1e293b'}}>
+      <div className="rounded-xl p-4 border border-green-900" style={{background:'#132b16'}}>
         <h3 className="text-white font-bold text-sm mb-4">📊 Redemption Rate</h3>
         {[
-          {label:'🎮 RouteDee AR',   pct:39.9,f:'#059669',t:'#0891b2',tc:'text-emerald-400',w:'80%'},
+          {label:'🎮 RouteDee AR',   pct:39.9,f:'#059669',t:'#007934',tc:'text-emerald-400',w:'80%'},
           {label:'📄 คูปองกระดาษ', pct:2.5, f:'#dc2626',t:'#b91c1c',tc:'text-red-400',    w:'5%'},
         ].map((b,i)=>(
           <div key={i} className="mb-3">
@@ -1039,13 +1039,13 @@ const BrandDashboard=()=>(
           <span className="text-emerald-300 font-bold text-sm">✨ RouteDee ดีกว่า <span className="text-xl font-black">16×</span>!</span>
         </div>
       </div>
-      <div className="rounded-xl p-4 border border-slate-700" style={{background:'#1e293b'}}>
+      <div className="rounded-xl p-4 border border-green-900" style={{background:'#132b16'}}>
         <h3 className="text-white font-bold text-sm mb-3">📈 Daily Redemption</h3>
         <LineChart data={DAILY} days={DAYS}/>
       </div>
     </div>
     <div className="grid grid-cols-3 gap-4">
-      <div className="rounded-xl p-4 border border-slate-700" style={{background:'#1e293b'}}>
+      <div className="rounded-xl p-4 border border-green-900" style={{background:'#132b16'}}>
         <h3 className="text-white font-bold text-sm mb-3">🔥 Traffic Heatmap</h3>
         {[
           {zone:'🧺 ของใช้',        pct:85,c:'#ef4444'},
@@ -1065,7 +1065,7 @@ const BrandDashboard=()=>(
           </div>
         ))}
       </div>
-      <div className="col-span-2 rounded-xl p-4 border border-slate-700" style={{background:'#1e293b'}}>
+      <div className="col-span-2 rounded-xl p-4 border border-green-900" style={{background:'#132b16'}}>
         <h3 className="text-white font-bold text-sm mb-3">💰 Revenue Streams</h3>
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -1170,22 +1170,22 @@ const App=()=>{
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-5" style={{background:'#030712'}}>
-      <div className="w-full max-w-5xl mb-4 text-center rounded-xl py-2 border border-slate-800"
-        style={{background:'#0f172a'}}>
-        <span className="text-slate-500 text-sm">🚀 Hackathon Demo — </span>
-        <span className="text-cyan-400 font-bold text-sm">Retail AR Navigation · Smart Route</span>
-        <span className="text-slate-500 text-sm"> · RouteDee</span>
+    <div className="min-h-screen flex flex-col items-center px-4 py-5" style={{background:'#050f07'}}>
+      <div className="w-full max-w-5xl mb-4 text-center rounded-xl py-2 border border-green-900/60"
+        style={{background:'#071d0a'}}>
+        <span className="text-green-700 text-sm">🚀 Hackathon Demo — </span>
+        <span className="text-yellow-400 font-bold text-sm">Retail AR Navigation · Smart Route</span>
+        <span className="text-green-700 text-sm"> · RouteDee</span>
       </div>
 
-      <div className="flex gap-2 mb-6 p-1 rounded-2xl border border-slate-800" style={{background:'#0f172a'}}>
+      <div className="flex gap-2 mb-6 p-1 rounded-2xl border border-green-900/60" style={{background:'#071d0a'}}>
         {[
-          {id:'customer',label:'📱 Customer App',  g:'from-emerald-600 to-cyan-600'},
-          {id:'brand',   label:'📊 Brand Dashboard',g:'from-blue-700 to-indigo-700'},
+          {id:'customer',label:'📱 Customer App',  g:'from-green-700 to-green-600'},
+          {id:'brand',   label:'📊 Brand Dashboard',g:'from-yellow-600 to-yellow-500'},
         ].map(v=>(
           <button key={v.id} onClick={()=>setView(v.id)}
             className={`px-6 py-2 rounded-xl font-semibold text-sm transition-all
-              ${view===v.id?`bg-gradient-to-r ${v.g} text-white shadow-lg`:'text-slate-400 hover:text-white'}`}>
+              ${view===v.id?`bg-gradient-to-r ${v.g} text-white shadow-lg`:'text-green-600 hover:text-yellow-400'}`}>
             {v.label}
           </button>
         ))}
@@ -1193,8 +1193,8 @@ const App=()=>{
 
       {view==='customer'&&(
         <div style={{width:360}}>
-          <div className="rounded-[38px] border-4 border-slate-700 shadow-2xl overflow-hidden flex flex-col"
-            style={{background:'#080c1a',height:700}}>
+          <div className="rounded-[38px] border-4 border-green-900 shadow-2xl overflow-hidden flex flex-col"
+            style={{background:'#071209',height:700}}>
             {/* status bar */}
             <div className="flex justify-between items-center px-5 py-2 bg-black/60 shrink-0">
               <span className="text-white text-xs font-semibold">9:41</span>
@@ -1203,16 +1203,16 @@ const App=()=>{
             </div>
             {/* header */}
             <div className="shrink-0 flex items-center justify-between px-4 py-2"
-              style={{background:'linear-gradient(135deg,#065f46,#0e7490)'}}>
+              style={{background:'linear-gradient(135deg,#007934,#00a651)'}}>
               <div>
                 <div className="text-white font-black text-base leading-none">🛒 RouteDee</div>
-                <div className="text-emerald-200 text-xs mt-0.5">
+                <div className="text-green-100 text-xs mt-0.5">
                   {coupons.length} คูปอง · {collected.length}/{waypoints.length||selected.size} จุด
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-yellow-200 text-xs font-semibold">🧠 Smart Route™</div>
-                <div className="text-emerald-100 text-xs">Nearest Neighbor TSP</div>
+                <div className="text-yellow-300 text-xs font-bold">🧠 Smart Route™</div>
+                <div className="text-green-100 text-xs">Nearest Neighbor TSP</div>
               </div>
             </div>
 
@@ -1250,7 +1250,7 @@ const App=()=>{
             </div>
 
             {/* bottom nav */}
-            <div className="shrink-0 border-t border-slate-800" style={{background:'#080c1a'}}>
+            <div className="shrink-0 border-t border-green-900/60" style={{background:"#071209"}}>
               <div className="flex">
                 {[
                   {id:'home',  icon:'🏠',label:'หน้าแรก'},
@@ -1260,10 +1260,10 @@ const App=()=>{
                 ].map(t=>(
                   <button key={t.id} onClick={()=>goTab(t.id)}
                     className={`flex-1 py-2.5 flex flex-col items-center relative transition-all
-                      ${activeTab===t.id?'text-cyan-400':'text-slate-600'}`}>
+                      ${activeTab===t.id?'text-yellow-400':'text-green-600'}`}>
                     <span className="text-xl leading-none">{t.icon}</span>
                     <span className="text-xs mt-0.5">{t.label}</span>
-                    {activeTab===t.id&&<div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-0.5"/>}
+                    {activeTab===t.id&&<div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-0.5"/>}
                     {t.badge&&(
                       <span className="absolute top-1.5 right-3 text-xs bg-red-500 text-white
                         rounded-full w-4 h-4 flex items-center justify-center font-bold">
