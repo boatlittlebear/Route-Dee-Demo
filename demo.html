@@ -63,19 +63,19 @@ const POS_BLOCK = { x:4, y:4, w:80, h:82 }; // POS decoration block
 
 const ZONE_DEFS = {
   // Row 0: POS area left (decoration) | DAIRY thin | PRODUCE wide | FROZEN/MEAT right
-  fresh:  {rx:88,  ry:4,  rw:18,  rh:78, row:0, bg:'#0d2a12',bd:'#15803d',tc:'#86efac',icon:'🥛',name:'นม/ไข่'},
-  veg:    {rx:110, ry:4,  rw:122, rh:78, row:0, bg:'#0d2e14',bd:'#166534',tc:'#4ade80',icon:'🥬',name:'ผักผลไม้'},
-  meat:   {rx:236, ry:4,  rw:72,  rh:78, row:0, bg:'#3a0b0b',bd:'#991b1b',tc:'#fca5a5',icon:'🥩',name:'เนื้อ/แช่แข็ง'},
+  fresh:  {rx:88,  ry:4,  rw:18,  rh:78, row:0, bg:'#0d2a12',bd:'#15803d',tc:'#86efac',icon:'🥛',name:'Dairy'},
+  veg:    {rx:110, ry:4,  rw:122, rh:78, row:0, bg:'#0d2e14',bd:'#166534',tc:'#4ade80',icon:'🥬',name:'Produce'},
+  meat:   {rx:236, ry:4,  rw:72,  rh:78, row:0, bg:'#3a0b0b',bd:'#991b1b',tc:'#fca5a5',icon:'🥩',name:'Meat/Frozen'},
   // Row 1: BAKERY left block + 5 narrow walk-through aisles (open top+bottom)
-  bakery: {rx:4,   ry:96, rw:78,  rh:96, row:1, bg:'#280a03',bd:'#9a3412',tc:'#fdba74',icon:'🍞',name:'เบเกอรี่'},
-  clean:  {rx:86,  ry:96, rw:26,  rh:96, row:1, bg:'#0a2212',bd:'#007934',tc:'#86efac',icon:'🧺',name:'ของใช้'},
-  beauty: {rx:116, ry:96, rw:26,  rh:96, row:1, bg:'#2d0514',bd:'#9f1239',tc:'#f9a8d4',icon:'🧴',name:'เครื่องสำอาง'},
-  grain:  {rx:146, ry:96, rw:26,  rh:96, row:1, bg:'#2a1504',bd:'#92400e',tc:'#fcd34d',icon:'🍚',name:'ข้าว/แป้ง'},
-  spice:  {rx:176, ry:96, rw:26,  rh:96, row:1, bg:'#1a0e03',bd:'#a16207',tc:'#fbbf24',icon:'🧂',name:'เครื่องปรุง'},
-  sweet:  {rx:206, ry:96, rw:26,  rh:96, row:1, bg:'#1f0d2e',bd:'#7e22ce',tc:'#e879f9',icon:'🍫',name:'ของหวาน'},
+  bakery: {rx:4,   ry:96, rw:78,  rh:96, row:1, bg:'#280a03',bd:'#9a3412',tc:'#fdba74',icon:'🍞',name:'Bakery'},
+  clean:  {rx:86,  ry:96, rw:26,  rh:96, row:1, bg:'#0a2212',bd:'#007934',tc:'#86efac',icon:'🧺',name:'Household'},
+  beauty: {rx:116, ry:96, rw:26,  rh:96, row:1, bg:'#2d0514',bd:'#9f1239',tc:'#f9a8d4',icon:'🧴',name:'Beauty'},
+  grain:  {rx:146, ry:96, rw:26,  rh:96, row:1, bg:'#2a1504',bd:'#92400e',tc:'#fcd34d',icon:'🍚',name:'Rice/Grains'},
+  spice:  {rx:176, ry:96, rw:26,  rh:96, row:1, bg:'#1a0e03',bd:'#a16207',tc:'#fbbf24',icon:'🧂',name:'Seasonings'},
+  sweet:  {rx:206, ry:96, rw:26,  rh:96, row:1, bg:'#1f0d2e',bd:'#7e22ce',tc:'#e879f9',icon:'🍫',name:'Sweets'},
   // Row 2: two wide horizontal sections at bottom
-  drink:  {rx:4,   ry:208,rw:118, rh:38, row:2, bg:'#0d2a16',bd:'#15803d',tc:'#4ade80',icon:'🥤',name:'เครื่องดื่ม'},
-  coffee: {rx:126, ry:208,rw:182, rh:38, row:2, bg:'#130a03',bd:'#a16207',tc:'#d4a96a',icon:'☕',name:'กาแฟ/ชา'},
+  drink:  {rx:4,   ry:208,rw:118, rh:38, row:2, bg:'#0d2a16',bd:'#15803d',tc:'#4ade80',icon:'🥤',name:'Beverages'},
+  coffee: {rx:126, ry:208,rw:182, rh:38, row:2, bg:'#130a03',bd:'#a16207',tc:'#d4a96a',icon:'☕',name:'Coffee/Tea'},
 };
 const ZONES = {};
 Object.entries(ZONE_DEFS).forEach(([id,d])=>{
@@ -174,106 +174,106 @@ const nearestNeighbor = zoneIds => {
 };
 
 /* ══════════════════════════════════════════════════════
-   PRODUCT CATALOG — 77 สินค้า 11 หมวด
+   PRODUCT CATALOG — 77 products, 11 categories
 ══════════════════════════════════════════════════════ */
 const CATALOG=[
-  // ผักผลไม้ (7)
-  {id:1, name:'ผักบุ้ง',           emoji:'🥬',zone:'veg'},
-  {id:2, name:'มะเขือเทศ',        emoji:'🍅',zone:'veg'},
-  {id:3, name:'แครอท',             emoji:'🥕',zone:'veg'},
-  {id:4, name:'แตงกวา',            emoji:'🥒',zone:'veg'},
-  {id:5, name:'ฟักทอง',            emoji:'🎃',zone:'veg'},
-  {id:56,name:'บรอกโคลี',         emoji:'🥦',zone:'veg'},
-  {id:57,name:'ผักสลัด',           emoji:'🥗',zone:'veg'},
-  // ของสด/นม (7)
-  {id:6, name:'ไข่ไก่',            emoji:'🥚',zone:'fresh'},
-  {id:7, name:'นมสด',               emoji:'🥛',zone:'fresh'},
-  {id:8, name:'เนย',                emoji:'🧈',zone:'fresh'},
-  {id:9, name:'โยเกิร์ต',          emoji:'🫙',zone:'fresh'},
-  {id:10,name:'ชีส',                emoji:'🧀',zone:'fresh'},
-  {id:58,name:'นมอัลมอนด์',       emoji:'🥛',zone:'fresh'},
-  {id:59,name:'ครีมสด',            emoji:'🍶',zone:'fresh'},
-  // เนื้อสัตว์ (7)
-  {id:11,name:'หมูสับ',             emoji:'🥩',zone:'meat'},
-  {id:12,name:'ไก่สด',              emoji:'🍗',zone:'meat'},
-  {id:13,name:'ปลาแซลมอน',      emoji:'🐟',zone:'meat'},
-  {id:14,name:'กุ้ง',                emoji:'🦐',zone:'meat'},
-  {id:15,name:'ปลาหมึก',            emoji:'🦑',zone:'meat'},
-  {id:60,name:'เนื้อวัว',            emoji:'🥩',zone:'meat'},
-  {id:61,name:'ทูน่ากระป๋อง',    emoji:'🐠',zone:'meat'},
-  // ข้าว/แป้ง (7)
-  {id:16,name:'ข้าวสาร',            emoji:'🍚',zone:'grain'},
-  {id:17,name:'มาม่า',              emoji:'🍜',zone:'grain'},
-  {id:18,name:'เส้นหมี่',           emoji:'🍝',zone:'grain'},
-  {id:19,name:'ขนมปัง',             emoji:'🍞',zone:'grain'},
-  {id:20,name:'แป้งสาลี',           emoji:'🌾',zone:'grain'},
-  {id:62,name:'ข้าวกล้อง',          emoji:'🌾',zone:'grain'},
-  {id:63,name:'ข้าวโอ๊ต',           emoji:'🥣',zone:'grain'},
-  // เครื่องปรุง (7)
-  {id:21,name:'น้ำมันพืช',         emoji:'🫙',zone:'spice'},
-  {id:22,name:'น้ำปลา',             emoji:'🐠',zone:'spice'},
-  {id:23,name:'ซอสปรุงรส',      emoji:'🍶',zone:'spice'},
-  {id:24,name:'น้ำตาล',             emoji:'🍬',zone:'spice'},
-  {id:25,name:'เกลือ',               emoji:'🧂',zone:'spice'},
-  {id:64,name:'ซีอิ๊วขาว',          emoji:'🫙',zone:'spice'},
-  {id:65,name:'น้ำพริกเผา',        emoji:'🌶️', zone:'spice'},
-  // ของหวาน (7)
-  {id:26,name:'คุกกี้',              emoji:'🍪',zone:'sweet'},
-  {id:27,name:'ช็อกโกแลต',      emoji:'🍫',zone:'sweet'},
-  {id:28,name:'ไอศกรีม',            emoji:'🍦',zone:'sweet'},
-  {id:29,name:'เยลลี่',              emoji:'🍮',zone:'sweet'},
-  {id:30,name:'ลูกอม',              emoji:'🍭',zone:'sweet'},
-  {id:66,name:'เวเฟอร์ครีม',      emoji:'🍘',zone:'sweet'},
-  {id:67,name:'ป๊อปคอร์น',         emoji:'🍿',zone:'sweet'},
-  // เครื่องดื่ม (7)
-  {id:31,name:'น้ำเปล่า',           emoji:'💧',zone:'drink'},
-  {id:32,name:'น้ำส้ม',              emoji:'🍊',zone:'drink'},
-  {id:33,name:'น้ำอัดลม',           emoji:'🥤',zone:'drink'},
-  {id:34,name:'ชาเขียว',            emoji:'🍵',zone:'drink'},
-  {id:35,name:'น้ำมะนาว',           emoji:'🍋',zone:'drink'},
-  {id:68,name:'เกเตอเรด',           emoji:'🏃',zone:'drink'},
-  {id:69,name:'น้ำผลไม้ผสม',      emoji:'🍹',zone:'drink'},
-  // กาแฟ/ชา (7)
-  {id:36,name:'กาแฟกระป๋อง',   emoji:'☕',zone:'coffee'},
-  {id:37,name:'ชาดำ',                emoji:'🫖',zone:'coffee'},
-  {id:38,name:'โอวัลติน',           emoji:'🥛',zone:'coffee'},
+  // Produce (7)
+  {id:1, name:'Morning Glory',           emoji:'🥬',zone:'veg'},
+  {id:2, name:'Tomato',        emoji:'🍅',zone:'veg'},
+  {id:3, name:'Carrot',             emoji:'🥕',zone:'veg'},
+  {id:4, name:'Cucumber',            emoji:'🥒',zone:'veg'},
+  {id:5, name:'Pumpkin',            emoji:'🎃',zone:'veg'},
+  {id:56,name:'Broccoli',         emoji:'🥦',zone:'veg'},
+  {id:57,name:'Salad Greens',           emoji:'🥗',zone:'veg'},
+  // Dairy (7)
+  {id:6, name:'Eggs',            emoji:'🥚',zone:'fresh'},
+  {id:7, name:'Fresh Milk',               emoji:'🥛',zone:'fresh'},
+  {id:8, name:'Butter',                emoji:'🧈',zone:'fresh'},
+  {id:9, name:'Yogurt',          emoji:'🫙',zone:'fresh'},
+  {id:10,name:'Cheese',                emoji:'🧀',zone:'fresh'},
+  {id:58,name:'Almond Milk',       emoji:'🥛',zone:'fresh'},
+  {id:59,name:'Fresh Cream',            emoji:'🍶',zone:'fresh'},
+  // Meat (7)
+  {id:11,name:'Ground Pork',             emoji:'🥩',zone:'meat'},
+  {id:12,name:'Fresh Chicken',              emoji:'🍗',zone:'meat'},
+  {id:13,name:'Salmon',      emoji:'🐟',zone:'meat'},
+  {id:14,name:'Shrimp',                emoji:'🦐',zone:'meat'},
+  {id:15,name:'Squid',            emoji:'🦑',zone:'meat'},
+  {id:60,name:'Beef',            emoji:'🥩',zone:'meat'},
+  {id:61,name:'Canned Tuna',    emoji:'🐠',zone:'meat'},
+  // Rice/Grains (7)
+  {id:16,name:'Rice',            emoji:'🍚',zone:'grain'},
+  {id:17,name:'Instant Noodles',              emoji:'🍜',zone:'grain'},
+  {id:18,name:'Rice Noodles',           emoji:'🍝',zone:'grain'},
+  {id:19,name:'Bread',             emoji:'🍞',zone:'grain'},
+  {id:20,name:'Wheat Flour',           emoji:'🌾',zone:'grain'},
+  {id:62,name:'Brown Rice',          emoji:'🌾',zone:'grain'},
+  {id:63,name:'Oats',           emoji:'🥣',zone:'grain'},
+  // Seasonings (7)
+  {id:21,name:'Vegetable Oil',         emoji:'🫙',zone:'spice'},
+  {id:22,name:'Fish Sauce',             emoji:'🐠',zone:'spice'},
+  {id:23,name:'Seasoning Sauce',      emoji:'🍶',zone:'spice'},
+  {id:24,name:'Sugar',             emoji:'🍬',zone:'spice'},
+  {id:25,name:'Salt',               emoji:'🧂',zone:'spice'},
+  {id:64,name:'Soy Sauce',          emoji:'🫙',zone:'spice'},
+  {id:65,name:'Chili Paste',        emoji:'🌶️', zone:'spice'},
+  // Sweets (7)
+  {id:26,name:'Cookies',              emoji:'🍪',zone:'sweet'},
+  {id:27,name:'Chocolate',      emoji:'🍫',zone:'sweet'},
+  {id:28,name:'Ice Cream',            emoji:'🍦',zone:'sweet'},
+  {id:29,name:'Jelly',              emoji:'🍮',zone:'sweet'},
+  {id:30,name:'Candy',              emoji:'🍭',zone:'sweet'},
+  {id:66,name:'Cream Wafer',      emoji:'🍘',zone:'sweet'},
+  {id:67,name:'Popcorn',         emoji:'🍿',zone:'sweet'},
+  // Beverages (7)
+  {id:31,name:'Water',           emoji:'💧',zone:'drink'},
+  {id:32,name:'Orange Juice',              emoji:'🍊',zone:'drink'},
+  {id:33,name:'Soda',           emoji:'🥤',zone:'drink'},
+  {id:34,name:'Green Tea',            emoji:'🍵',zone:'drink'},
+  {id:35,name:'Lemonade',           emoji:'🍋',zone:'drink'},
+  {id:68,name:'Gatorade',           emoji:'🏃',zone:'drink'},
+  {id:69,name:'Fruit Mix Juice',      emoji:'🍹',zone:'drink'},
+  // Coffee/Tea (7)
+  {id:36,name:'Canned Coffee',   emoji:'☕',zone:'coffee'},
+  {id:37,name:'Black Tea',                emoji:'🫖',zone:'coffee'},
+  {id:38,name:'Ovaltine',           emoji:'🥛',zone:'coffee'},
   {id:39,name:'Milo',                 emoji:'🫙',zone:'coffee'},
-  {id:40,name:'กาแฟซอง',           emoji:'☕',zone:'coffee'},
-  {id:70,name:'ชาชัก',              emoji:'🍵',zone:'coffee'},
-  {id:71,name:'กาแฟแคปซูล',      emoji:'🫘',zone:'coffee'},
-  // ของใช้ (7)
-  {id:41,name:'ผงซักฟอก',          emoji:'🧺',zone:'clean'},
-  {id:42,name:'น้ำยาล้างจาน',   emoji:'🫧',zone:'clean'},
-  {id:43,name:'สบู่',                 emoji:'🧼',zone:'clean'},
-  {id:44,name:'น้ำยาปรับผ้านุ่ม',emoji:'🧴',zone:'clean'},
-  {id:45,name:'น้ำยาห้องน้ำ',   emoji:'🚿',zone:'clean'},
-  {id:72,name:'กระดาษชำระ',      emoji:'🧻',zone:'clean'},
-  {id:73,name:'ถุงขยะ',             emoji:'🗑️', zone:'clean'},
-  // เครื่องสำอาง (7)
-  {id:46,name:'แชมพู',              emoji:'🧴',zone:'beauty'},
-  {id:47,name:'ยาสีฟัน',            emoji:'🦷',zone:'beauty'},
-  {id:48,name:'กระดาษทิชชู',    emoji:'🧻',zone:'beauty'},
-  {id:49,name:'โลชั่น',              emoji:'🧴',zone:'beauty'},
-  {id:50,name:'ครีมบำรุงผิว',    emoji:'✨',zone:'beauty'},
-  {id:74,name:'ครีมกันแดด',       emoji:'🌞',zone:'beauty'},
-  {id:75,name:'ลิปบาล์ม',          emoji:'💄',zone:'beauty'},
-  // เบเกอรี่ (7)
-  {id:51,name:'เค้กชอคโกแลต',  emoji:'🎂',zone:'bakery'},
-  {id:52,name:'โดนัท',               emoji:'🍩',zone:'bakery'},
-  {id:53,name:'ครัวซอง',            emoji:'🥐',zone:'bakery'},
-  {id:54,name:'มาการอง',            emoji:'🫠',zone:'bakery'},
-  {id:55,name:'พายแอปเปิ้ล',     emoji:'🥧',zone:'bakery'},
-  {id:76,name:'ขนมปังกรอบ',      emoji:'🍞',zone:'bakery'},
-  {id:77,name:'มัฟฟินบลูเบอร์รี่',emoji:'🧁',zone:'bakery'},
+  {id:40,name:'Instant Coffee',           emoji:'☕',zone:'coffee'},
+  {id:70,name:'Thai Tea',              emoji:'🍵',zone:'coffee'},
+  {id:71,name:'Coffee Capsule',      emoji:'🫘',zone:'coffee'},
+  // Household (7)
+  {id:41,name:'Laundry Powder',          emoji:'🧺',zone:'clean'},
+  {id:42,name:'Dish Soap',   emoji:'🫧',zone:'clean'},
+  {id:43,name:'Soap',                 emoji:'🧼',zone:'clean'},
+  {id:44,name:'Fabric Softener',emoji:'🧴',zone:'clean'},
+  {id:45,name:'Bathroom Cleaner',   emoji:'🚿',zone:'clean'},
+  {id:72,name:'Toilet Paper',      emoji:'🧻',zone:'clean'},
+  {id:73,name:'Trash Bags',             emoji:'🗑️', zone:'clean'},
+  // Beauty (7)
+  {id:46,name:'Shampoo',              emoji:'🧴',zone:'beauty'},
+  {id:47,name:'Toothpaste',            emoji:'🦷',zone:'beauty'},
+  {id:48,name:'Tissue Paper',    emoji:'🧻',zone:'beauty'},
+  {id:49,name:'Lotion',              emoji:'🧴',zone:'beauty'},
+  {id:50,name:'Moisturizer',    emoji:'✨',zone:'beauty'},
+  {id:74,name:'Sunscreen',       emoji:'🌞',zone:'beauty'},
+  {id:75,name:'Lip Balm',          emoji:'💄',zone:'beauty'},
+  // Bakery (7)
+  {id:51,name:'Chocolate Cake',  emoji:'🎂',zone:'bakery'},
+  {id:52,name:'Donut',               emoji:'🍩',zone:'bakery'},
+  {id:53,name:'Croissant',            emoji:'🥐',zone:'bakery'},
+  {id:54,name:'Macaron',            emoji:'🫠',zone:'bakery'},
+  {id:55,name:'Apple Pie',     emoji:'🥧',zone:'bakery'},
+  {id:76,name:'Crispy Bread',      emoji:'🍞',zone:'bakery'},
+  {id:77,name:'Blueberry Muffin',emoji:'🧁',zone:'bakery'},
 ];
 
 const ZONE_MONSTERS={
-  veg:   {id:'mv',brand:'Dole ผักออร์แกนิก', discount:20,rarity:'Rare',     rc:'#60a5fa',emoji:'🌿'},
-  meat:  {id:'mm',brand:'CP เนื้อสัตว์',      discount:30,rarity:'Rare',     rc:'#60a5fa',emoji:'🐉'},
-  spice: {id:'ms',brand:'Pantai เครื่องปรุง', discount:15,rarity:'Common',   rc:'#4ade80',emoji:'👾'},
-  drink: {id:'md',brand:'Ichitan เครื่องดื่ม', discount:15,rarity:'Common',   rc:'#4ade80',emoji:'👻'},
-  clean: {id:'mc',brand:'Attack ผงซักฟอก',    discount:50,rarity:'Legendary',rc:'#fbbf24',emoji:'⚡'},
-  beauty:{id:'mb',brand:'Pantene แชมพู',       discount:40,rarity:'Epic',     rc:'#e879f9',emoji:'💫'},
+  veg:   {id:'mv',brand:'Dole Organic Veg', discount:20,rarity:'Rare',     rc:'#60a5fa',emoji:'🌿'},
+  meat:  {id:'mm',brand:'CP Meats',      discount:30,rarity:'Rare',     rc:'#60a5fa',emoji:'🐉'},
+  spice: {id:'ms',brand:'Pantai Seasonings', discount:15,rarity:'Common',   rc:'#4ade80',emoji:'👾'},
+  drink: {id:'md',brand:'Ichitan Beverages', discount:15,rarity:'Common',   rc:'#4ade80',emoji:'👻'},
+  clean: {id:'mc',brand:'Attack Laundry',    discount:50,rarity:'Legendary',rc:'#fbbf24',emoji:'⚡'},
+  beauty:{id:'mb',brand:'Pantene Shampoo',       discount:40,rarity:'Epic',     rc:'#e879f9',emoji:'💫'},
 };
 
 const LABELS='ABCDEFGHIJK';
@@ -433,7 +433,7 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
                       fill={active?'#007934':'rgba(255,255,255,.1)'}/>
                     <text x={z.cx} y={z.ry+(isNarrow?46:44)} textAnchor="middle"
                       fill="white" fontSize="7" fontWeight="700">
-                      {waypoints[wpIdx].items.length}ชิ้น
+                      {waypoints[wpIdx].items.length} item{waypoints[wpIdx].items.length!==1?'s':''}
                     </text>
                   </>
                 )}
@@ -504,7 +504,7 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
       <rect x={ENTRANCE.x-7} y={ENTRANCE.y-4} width={14} height={8} rx="2"
         fill="#004d1f"/>
       <text x={ENTRANCE.x} y={ENTRANCE.y+14} textAnchor="middle"
-        fill="#4ade80" fontSize="7" fontWeight="600">ทางเข้า</text>
+        fill="#4ade80" fontSize="7" fontWeight="600">Entrance</text>
       <line x1={ENTRANCE.x} y1={H_AISLE[3]+8} x2={ENTRANCE.x} y2={ENTRANCE.y-14}
         stroke="#007934" strokeWidth="1.2" strokeDasharray="3,3" opacity="0.4"/>
 
@@ -524,16 +524,16 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
 /* ══════════════════════════════════════════════════════
    PRODUCT PICKER
 ══════════════════════════════════════════════════════ */
-const ZONE_NAMES={veg:'ผักผลไม้',fresh:'ของสด/นม',meat:'เนื้อสัตว์',grain:'ข้าว/แป้ง',
-  spice:'เครื่องปรุง',sweet:'ของหวาน',drink:'เครื่องดื่ม',coffee:'กาแฟ/ชา',
-  clean:'ของใช้',beauty:'เครื่องสำอาง',bakery:'เบเกอรี่'};
+const ZONE_NAMES={veg:'Produce',fresh:'Dairy',meat:'Meat/Frozen',grain:'Rice/Grains',
+  spice:'Seasonings',sweet:'Sweets',drink:'Beverages',coffee:'Coffee/Tea',
+  clean:'Household',beauty:'Beauty',bakery:'Bakery'};
 
 const ProductPicker=({selected,onToggle,onStart})=>{
   const [q,setQ]=useState('');
-  const [cat,setCat]=useState('ทั้งหมด');
-  const cats=['ทั้งหมด',...Object.keys(ZONE_DEFS)];
+  const [cat,setCat]=useState('All');
+  const cats=['All',...Object.keys(ZONE_DEFS)];
   const filtered=useMemo(()=>CATALOG.filter(p=>{
-    const mc=cat==='ทั้งหมด'||p.zone===cat;
+    const mc=cat==='All'||p.zone===cat;
     const mq=p.name.includes(q)||ZONE_NAMES[p.zone].includes(q);
     return mc&&mq;
   }),[q,cat]);
@@ -543,14 +543,14 @@ const ProductPicker=({selected,onToggle,onStart})=>{
     <div className="h-full flex flex-col" style={{background:"#071209"}}>
       <div className="px-3 pt-3 pb-2 shrink-0">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-white font-bold text-sm">🛒 เลือกสินค้า</h2>
+          <h2 className="text-white font-bold text-sm">🛒 Select Items</h2>
           {n>0&&<span className="text-xs font-bold px-2 py-0.5 rounded-full text-white"
-            style={{background:'linear-gradient(135deg,#059669,#007934)'}}>เลือกแล้ว {n} ชิ้น</span>}
+            style={{background:'linear-gradient(135deg,#059669,#007934)'}}>Selected {n} item{n!==1?'s':''}</span>}
         </div>
         {/* search */}
         <div className="relative mb-2">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs">🔍</span>
-          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="ค้นหาสินค้า..."
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search items..."
             className="w-full pl-7 pr-8 py-1.5 rounded-xl text-xs text-white placeholder-gray-600
               border border-green-900 outline-none focus:border-yellow-500"
             style={{background:'#0e1f11'}}/>
@@ -567,7 +567,7 @@ const ProductPicker=({selected,onToggle,onStart})=>{
                 color:cat===c?'white':'#64748b',
                 border:cat===c?'none':'1px solid #1e3a5f',
               }}>
-              {c==='ทั้งหมด'?'ทั้งหมด':(ZONE_DEFS[c]?.icon||'')+' '+ZONE_NAMES[c]}
+              {c==='All'?'All':(ZONE_DEFS[c]?.icon||'')+' '+ZONE_NAMES[c]}
             </button>
           ))}
         </div>
@@ -575,7 +575,7 @@ const ProductPicker=({selected,onToggle,onStart})=>{
 
       <div className="flex-1 overflow-y-auto px-3 pb-2">
         {filtered.length===0
-          ? <div className="text-center py-10 text-gray-600 text-xs">ไม่พบสินค้า</div>
+          ? <div className="text-center py-10 text-gray-600 text-xs">No items found</div>
           : (
             <div className="grid grid-cols-2 gap-1.5">
               {filtered.map(p=>{
@@ -629,7 +629,7 @@ const ProductPicker=({selected,onToggle,onStart})=>{
             color:n>0?'white':'#475569',
             boxShadow:n>0?'0 4px 18px rgba(5,150,105,.35)':'none',
           }}>
-          {n===0?'เลือกสินค้าก่อนเริ่มช้อป':`🗺️ คำนวณเส้นทางสั้นสุด · ${n} ชิ้น`}
+          {n===0?'Select items to start shopping':`🗺️ Calculate Shortest Route · ${n} item${n!==1?'s':''}`}
         </button>
       </div>
     </div>
@@ -648,9 +648,9 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
   return (
     <div className="h-full overflow-y-auto p-2.5" style={{background:"#071209"}}>
       <div className="flex items-center justify-between mb-1.5">
-        <button onClick={onBack} className="text-green-600 text-xs underline">← แก้รายการ</button>
+        <button onClick={onBack} className="text-green-600 text-xs underline">← Edit List</button>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-yellow-400 font-semibold">{collected.length}/{waypoints.length} จุด</span>
+          <span className="text-xs text-yellow-400 font-semibold">{collected.length}/{waypoints.length} stops</span>
           {totalDist>0&&<span className="text-xs text-gray-500">{totalDist}m</span>}
         </div>
       </div>
@@ -686,10 +686,10 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
           <div className="rounded-xl px-3 py-2 border border-yellow-600/40 text-center"
             style={{background:'rgba(0,121,52,.12)'}}>
             <div className="text-yellow-300 text-xs font-semibold">
-              🧠 Smart Route คำนวณเส้นทางสั้นสุดแล้ว!
+              🧠 Smart Route calculated the shortest path!
             </div>
             <div className="text-gray-500 text-xs mt-0.5">
-              {waypoints.length} จุด · ระยะรวม ~{waypoints.reduce((a,w)=>a+w.dist,0)}m
+              {waypoints.length} stop{waypoints.length!==1?'s':''} · Total ~{waypoints.reduce((a,w)=>a+w.dist,0)}m
             </div>
           </div>
         )}
@@ -699,7 +699,7 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
           <button onClick={onWalk}
             className="w-full py-3 rounded-2xl font-bold text-white text-sm"
             style={{background:'linear-gradient(135deg,#059669,#007934)',boxShadow:'0 4px 16px rgba(5,150,105,.35)'}}>
-            🚶 เริ่มเดินช้อป!
+            🚶 Start Shopping!
           </button>
         )}
 
@@ -708,8 +708,8 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
             style={{background:'rgba(0,121,52,.12)'}}>
             <div className="text-yellow-300 font-bold text-xs">
               {stepIdx>=waypoints.length-1&&collected.length===waypoints.length
-                ? '🛒 กำลังเดินไปชำระเงิน (POS)…'
-                : `🚶 กำลังเดินไปยัง Zone ${waypoints[stepIdx+1]?.label} — ${waypoints[stepIdx+1]?.zoneName}…`}
+                ? '🛒 Walking to checkout (POS)…'
+                : `🚶 Walking to Zone ${waypoints[stepIdx+1]?.label} — ${waypoints[stepIdx+1]?.zoneName}…`}
             </div>
           </div>
         )}
@@ -720,13 +720,13 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
             <div className="rounded-xl p-3 border border-yellow-500/50 text-center"
               style={{background:'linear-gradient(135deg,rgba(16,185,129,.15),rgba(0,121,52,.2))'}}>
               <div className="text-2xl mb-1">🏪</div>
-              <div className="text-yellow-300 font-bold text-sm">ถึงแคชเชียร์แล้ว!</div>
-              <div className="text-gray-400 text-xs mt-0.5">รวบรวมสินค้าครบทุกชิ้น</div>
+              <div className="text-yellow-300 font-bold text-sm">Reached Checkout!</div>
+              <div className="text-gray-400 text-xs mt-0.5">All items collected</div>
             </div>
             <button onClick={onFinish}
               className="w-full py-3 rounded-2xl font-black text-white text-base"
               style={{background:'linear-gradient(135deg,#f59e0b,#ef4444)',boxShadow:'0 4px 18px rgba(245,158,11,.5)'}}>
-              🏁 ชำระเงินแล้ว! ดูสรุป
+              🏁 Checkout Done! View Summary
             </button>
           </div>
         )}
@@ -740,7 +740,7 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
                 {wp.items.map(p=>`${p.emoji} ${p.name}`).join('  ·  ')}
               </div>
               {wp.items.length>1&&(
-                <div className="text-emerald-400 text-xs mt-0.5">เก็บได้ทีเดียว {wp.items.length} ชิ้น!</div>
+                <div className="text-emerald-400 text-xs mt-0.5">Grab {wp.items.length} item{wp.items.length!==1?'s':''} here!</div>
               )}
             </div>
 
@@ -752,7 +752,7 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
                   boxShadow:'0 0 16px rgba(109,40,217,.4)',
                   animation:'float 2s ease-in-out infinite',
                 }}>
-                ⚡ {wp.monster.rarity}! {wp.monster.emoji} ปีศาจโผล่ — แตะเพื่อจับ!
+                ⚡ {wp.monster.rarity}! {wp.monster.emoji} Deal Monster appeared — tap to catch!
               </button>
             )}
 
@@ -760,19 +760,19 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
               <button onClick={onWalk}
                 className="w-full py-2.5 rounded-2xl font-bold text-white text-sm"
                 style={{background:'linear-gradient(135deg,#007934,#00843d)'}}>
-                🚶 เดินต่อ → {waypoints[stepIdx+1]?.label} {waypoints[stepIdx+1]?.zoneName}
+                🚶 Next → {waypoints[stepIdx+1]?.label} {waypoints[stepIdx+1]?.zoneName}
               </button>
             ):stepIdx<waypoints.length?(
               <button onClick={onWalk}
                 className="w-full py-3 rounded-2xl font-black text-white text-base"
                 style={{background:'linear-gradient(135deg,#059669,#007934)',boxShadow:'0 4px 18px rgba(5,150,105,.4)',animation:'float 1.8s ease-in-out infinite'}}>
-                🛒 เก็บครบแล้ว! เดินไปชำระเงิน →
+                🛒 All collected! Head to checkout →
               </button>
             ):(
               <button onClick={onFinish}
                 className="w-full py-3 rounded-2xl font-black text-white text-base"
                 style={{background:'linear-gradient(135deg,#f59e0b,#ef4444)',boxShadow:'0 4px 18px rgba(245,158,11,.5)'}}>
-                🏁 ชำระเงินแล้ว! ดูสรุป
+                🏁 Checkout Done! View Summary
               </button>
             )}
           </div>
@@ -781,8 +781,8 @@ const WalkNavigator=({waypoints,stepIdx,moving,collected,coupons,userPos,onWalk,
         {/* mini stats */}
         <div className="flex gap-1.5">
           {[
-            {icon:'👟',v:Math.round(totalDist*1.35),u:'ก้าว'},
-            {icon:'📏',v:totalDist,u:'เมตร'},
+            {icon:'👟',v:Math.round(totalDist*1.35),u:'steps'},
+            {icon:'📏',v:totalDist,u:'m'},
             {icon:'🔥',v:Math.round(totalDist*0.058),u:'kcal'},
           ].map((s,i)=>(
             <div key={i} className="flex-1 rounded-xl p-1.5 text-center border border-green-900/60"
@@ -818,7 +818,7 @@ const MonsterCatch=({monster,lives,onCaught,onEscape,onLiveLost})=>{
       style={{background:'linear-gradient(160deg,#051a09,#093018)'}}>
       {phase!=='success'&&(
         <div className="w-full flex justify-between items-center mb-3">
-          <div className="text-xs text-gray-500">ครั้งที่ {attempts+1}</div>
+          <div className="text-xs text-gray-500">Attempt {attempts+1}</div>
           <div className="text-sm leading-none">{'❤️'.repeat(lives)}{'🖤'.repeat(5-lives)}</div>
         </div>
       )}
@@ -826,7 +826,7 @@ const MonsterCatch=({monster,lives,onCaught,onEscape,onLiveLost})=>{
         <>
           <div className="text-yellow-400 text-xs font-bold rounded-full px-3 py-1.5 mb-3
             border border-yellow-500/50" style={{background:'rgba(120,60,0,.2)'}}>
-            ⚡ พบปีศาจ {monster.rarity}!
+            ⚡ {monster.rarity} Monster!
           </div>
           <div className="text-8xl mb-2 ani-float"
             style={{filter:'drop-shadow(0 0 28px rgba(180,80,255,.85))'}}>
@@ -836,7 +836,7 @@ const MonsterCatch=({monster,lives,onCaught,onEscape,onLiveLost})=>{
           <div className="w-full rounded-2xl p-3 text-center mb-4 border border-purple-500/40"
             style={{background:'rgba(46,16,101,.55)'}}>
             <div className="text-white font-bold text-sm">{monster.brand}</div>
-            <div className="font-black text-3xl text-green-400">ลด ฿{monster.discount}</div>
+            <div className="font-black text-3xl text-green-400">Save ฿{monster.discount}</div>
           </div>
         </>
       )}
@@ -845,35 +845,35 @@ const MonsterCatch=({monster,lives,onCaught,onEscape,onLiveLost})=>{
           <button onClick={handleThrow}
             className="w-full py-4 rounded-2xl font-black text-white text-xl mb-2"
             style={{background:'linear-gradient(135deg,#007934,#ffc300)',boxShadow:'0 4px 24px rgba(124,58,237,.5)'}}>
-            🎯 ขว้าง!
+            🎯 Throw!
           </button>
-          <button onClick={onEscape} className="text-slate-500 text-xs underline">หนีกลับ</button>
+          <button onClick={onEscape} className="text-slate-500 text-xs underline">Run Away</button>
         </>
       )}
       {phase==='throwing'&&(
         <div className="w-full py-4 rounded-2xl text-center text-white font-bold text-lg ani-shake"
-          style={{background:'#4b5563'}}>⚡ กำลังขว้าง…</div>
+          style={{background:'#4b5563'}}>⚡ Throwing…</div>
       )}
       {phase==='fail'&&(
         <div className="w-full ani-bounce-in space-y-2">
-          <div className="text-red-400 font-bold text-center text-lg">หลุดมือ! 😤 ❤️−1</div>
+          <div className="text-red-400 font-bold text-center text-lg">Missed! 😤 ❤️−1</div>
           <button onClick={()=>setPhase('encounter')}
             className="w-full py-3 rounded-xl text-white font-bold"
             style={{background:'linear-gradient(135deg,#007934,#ffc300)'}}>
-            🎯 ลองอีกครั้ง!
+            🎯 Try Again!
           </button>
           <button onClick={onEscape}
             className="w-full py-2.5 rounded-xl text-red-300 font-semibold text-sm border border-red-800"
             style={{background:'rgba(127,29,29,.3)'}}>
-            🏃 หนีเลย
+            🏃 Run Away
           </button>
         </div>
       )}
       {phase==='success'&&(
         <div className="text-center ani-bounce-in">
           <div className="text-7xl mb-2">🎉</div>
-          <div className="text-green-400 font-black text-2xl mb-1">จับได้!</div>
-          <div className="text-green-300 font-bold text-xl">฿{monster.discount} เข้ากระเป๋า!</div>
+          <div className="text-green-400 font-black text-2xl mb-1">Caught!</div>
+          <div className="text-green-300 font-bold text-xl">฿{monster.discount} saved!</div>
         </div>
       )}
     </div>
@@ -894,13 +894,13 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
       <div className="px-4 pt-5 pb-3 text-center"
         style={{background:'linear-gradient(180deg,rgba(5,150,105,.2),transparent)'}}>
         <div className="text-5xl mb-1">🏁</div>
-        <h2 className="text-white font-black text-xl">ช้อปเสร็จแล้ว!</h2>
-        <p className="text-emerald-300 text-xs mt-0.5">{items} ชิ้น · {waypoints.length} จุด</p>
+        <h2 className="text-white font-black text-xl">Shopping Done!</h2>
+        <p className="text-emerald-300 text-xs mt-0.5">{items} item{items!==1?'s':''} · {waypoints.length} stop{waypoints.length!==1?'s':''}</p>
       </div>
 
       {/* route recap */}
       <div className="px-4 mb-3">
-        <div className="text-gray-600 text-xs mb-1.5 text-center">เส้นทางที่เดิน (Smart Route)</div>
+        <div className="text-gray-600 text-xs mb-1.5 text-center">Route taken (Smart Route)</div>
         <div className="flex items-center justify-center gap-1 flex-wrap">
           <span className="text-xs text-gray-600 px-1.5 py-0.5 rounded border border-green-900/60"
             style={{background:'rgba(255,255,255,.03)'}}>IN</span>
@@ -925,10 +925,10 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
       {/* stats */}
       <div className="px-4 grid grid-cols-2 gap-2 mb-3">
         {[
-          {icon:'🔥',label:'แคลอรี่เผาไหม้',v:kcal,   u:'kcal',f:'#7c2d12',t:'#92400e',g:'rgba(239,68,68,.3)'},
-          {icon:'👟',label:'จำนวนก้าว',      v:steps,  u:'ก้าว', f:'#1a4025',t:'#1e40af',g:'rgba(59,130,246,.3)'},
-          {icon:'📏',label:'ระยะทางรวม',     v:dist,   u:'เมตร', f:'#14532d',t:'#065f46',g:'rgba(16,185,129,.3)'},
-          {icon:'⏱', label:'ใช้เวลา',         v:'~'+Math.round(dist/60+2)+'นาที',u:'',f:'#312e81',t:'#4c1d95',g:'rgba(139,92,246,.3)'},
+          {icon:'🔥',label:'Calories Burned',v:kcal,   u:'kcal',f:'#7c2d12',t:'#92400e',g:'rgba(239,68,68,.3)'},
+          {icon:'👟',label:'Steps',           v:steps,  u:'steps',f:'#1a4025',t:'#1e40af',g:'rgba(59,130,246,.3)'},
+          {icon:'📏',label:'Distance',        v:dist,   u:'m',    f:'#14532d',t:'#065f46',g:'rgba(16,185,129,.3)'},
+          {icon:'⏱', label:'Time',             v:'~'+Math.round(dist/60+2)+'min', u:'',f:'#312e81',t:'#4c1d95',g:'rgba(139,92,246,.3)'},
         ].map((s,i)=>(
           <div key={i} className="rounded-2xl p-3 text-center border border-white/10 ani-calorie"
             style={{background:`linear-gradient(135deg,${s.f},${s.t})`,boxShadow:`0 4px 18px ${s.g}`,
@@ -945,10 +945,10 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
       <div className="px-4 mb-3">
         <div className="rounded-xl p-3 border border-green-900/60 text-xs text-center"
           style={{background:'rgba(255,255,255,.03)'}}>
-          <span className="text-gray-400">เดินวันนี้เท่ากับ </span>
-          <span className="text-yellow-300 font-bold">ขึ้นลิฟท์ {Math.max(1,Math.round(kcal/7))} ชั้น 🏢</span>
-          <span className="text-gray-400"> หรือ </span>
-          <span className="text-orange-300 font-bold">กิน {Math.max(1,Math.round(kcal/52))} กล้วย 🍌</span>
+          <span className="text-gray-400">Today's walk equals </span>
+          <span className="text-yellow-300 font-bold">{Math.max(1,Math.round(kcal/7))} floors 🏢</span>
+          <span className="text-gray-400"> or </span>
+          <span className="text-orange-300 font-bold">{Math.max(1,Math.round(kcal/52))} bananas 🍌</span>
         </div>
       </div>
 
@@ -956,9 +956,9 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
         <div className="px-4 mb-3">
           <div className="rounded-2xl p-3 border border-yellow-600/40 text-center"
             style={{background:'linear-gradient(135deg,rgba(120,60,0,.3),rgba(45,20,0,.3))'}}>
-            <div className="text-yellow-300 text-xs font-semibold mb-0.5">💰 ประหยัดได้วันนี้</div>
+            <div className="text-yellow-300 text-xs font-semibold mb-0.5">💰 Saved Today</div>
             <div className="text-yellow-400 font-black text-3xl glow-gold">฿{saved}</div>
-            <div className="text-gray-500 text-xs mt-0.5">{coupons.length} คูปอง</div>
+            <div className="text-gray-500 text-xs mt-0.5">{coupons.length} coupon{coupons.length!==1?'s':''}</div>
           </div>
         </div>
       )}
@@ -966,11 +966,11 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
       <div className="px-4 pb-4 flex gap-2">
         <button onClick={onViewCoupons} className="flex-1 py-3 rounded-xl text-white font-bold text-sm"
           style={{background:'linear-gradient(135deg,#007934,#00a651)'}}>
-          🎫 ดูคูปอง ({coupons.length})
+          🎫 View Coupons ({coupons.length})
         </button>
         <button onClick={onLeaderboard} className="flex-1 py-3 rounded-xl text-white font-bold text-sm"
           style={{background:'linear-gradient(135deg,#7c3aed,#00843d)'}}>
-          🏆 อันดับ
+          🏆 Ranking
         </button>
       </div>
     </div>
@@ -979,19 +979,19 @@ const ShoppingSummary=({waypoints,coupons,onViewCoupons,onLeaderboard})=>{
 
 /* ══════════════════════════════════════════════════════
    LEADERBOARD / COUPON WALLET / BRAND DASHBOARD
-   (ส่วนนี้คงเดิม — ย่อให้สั้น)
+   (leaderboard data — unchanged)
 ══════════════════════════════════════════════════════ */
 const LEADERBOARD=[
-  {rank:1, name:'นักล่าดีล_มิกกี้', avatar:'🦁',savings:1247,reward:'฿500'},
-  {rank:2, name:'คุณแม่ประหยัด99',  avatar:'🦊',savings:980, reward:'฿300'},
-  {rank:3, name:'ช้อปเก่ง_เจน',     avatar:'🐯',savings:875, reward:'฿100'},
-  {rank:4, name:'ดีลมาสเตอร์_พล',  avatar:'🐺',savings:720},
-  {rank:5, name:'ประหยัดจัด_นุ้ย',  avatar:'🐨',savings:615},
-  {rank:6, name:'SuperSaver_บอส',   avatar:'🦝',savings:475},
-  {rank:7, name:'ปลา_ช้อป',         avatar:'🐠',savings:423,isMe:true},
-  {rank:8, name:'deal_hunter_แพร',  avatar:'🦋',savings:380},
-  {rank:9, name:'ขาช้อป_อาร์ม',    avatar:'🐻',savings:290},
-  {rank:10,name:'ช้อปทุกวัน_มิ้น', avatar:'🐱',savings:185},
+  {rank:1, name:'DealHunter_Mickey', avatar:'🦁',savings:1247,reward:'฿500'},
+  {rank:2, name:'ThriftMom99',  avatar:'🦊',savings:980, reward:'฿300'},
+  {rank:3, name:'SmartShopper_Jane',     avatar:'🐯',savings:875, reward:'฿100'},
+  {rank:4, name:'DealMaster_Pol',  avatar:'🐺',savings:720},
+  {rank:5, name:'BigSaver_Nui',  avatar:'🐨',savings:615},
+  {rank:6, name:'SuperSaver_Boss',   avatar:'🦝',savings:475},
+  {rank:7, name:'Fish_Shop',         avatar:'🐠',savings:423,isMe:true},
+  {rank:8, name:'deal_hunter_Prae',  avatar:'🦋',savings:380},
+  {rank:9, name:'ShopFanatic_Arm',    avatar:'🐻',savings:290},
+  {rank:10,name:'DailyShop_Min', avatar:'🐱',savings:185},
 ];
 
 const Leaderboard=()=>(
@@ -1001,13 +1001,13 @@ const Leaderboard=()=>(
       style={{background:'linear-gradient(160deg,#051a09,#093018)'}}>
       <div className="text-5xl leading-none mb-1" style={{filter:'drop-shadow(0 0 18px #ffd700)'}}>🏆</div>
       <h2 className="font-black text-xl glow-gold" style={{color:'#ffd700'}}>The Deal Hunter</h2>
-      <p className="text-green-300 text-xs mt-0.5">สุดยอดนักล่าดีลประจำเดือน มี.ค. 2569</p>
+      <p className="text-green-300 text-xs mt-0.5">Top Deal Hunters of March 2026</p>
       <div className="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5
         border border-yellow-600/50" style={{background:'rgba(0,121,52,.3)'}}>
         <span className="text-xs text-green-300">⏱</span>
-        <span className="text-white font-mono text-xs">รีเซ็ตใน <span className="text-yellow-300 font-bold">8วัน 14ชม.</span></span>
+        <span className="text-white font-mono text-xs">Resets in <span className="text-yellow-300 font-bold">8d 14h</span></span>
       </div>
-      <div className="mt-1 text-gray-500 text-xs">วัดจาก 💰 Total Savings</div>
+      <div className="mt-1 text-gray-500 text-xs">Ranked by 💰 Total Savings</div>
     </div>
     <div className="px-3 mt-1">
       <div className="flex items-end justify-center gap-1.5">
@@ -1025,7 +1025,7 @@ const Leaderboard=()=>(
                 style={{animationDelay:`${ri*.3}s`,filter:`drop-shadow(0 0 10px ${cl.c})`}}>{p.avatar}</div>
               <div className="font-semibold text-xs text-center leading-tight px-0.5 mb-0.5" style={{color:cl.c}}>{p.name}</div>
               <div className="font-bold text-sm ani-num-glow" style={{color:cl.c}}>฿{p.savings.toLocaleString()}</div>
-              {ri===0&&<div className="text-yellow-300 text-xs font-bold">แชมป์ 👑</div>}
+              {ri===0&&<div className="text-yellow-300 text-xs font-bold">Champion 👑</div>}
               <div className="w-full mt-1 rounded-t-xl flex items-center justify-center"
                 style={{height:`${ph}px`,background:cl.bg,boxShadow:`0 0 16px ${cl.sh}`}}>
                 <span className="text-2xl">{cl.icon}</span>
@@ -1035,17 +1035,17 @@ const Leaderboard=()=>(
         })}
       </div>
       <div className="grid grid-cols-3 gap-1.5 mt-3">
-        {['คูปอง ฿500','คูปอง ฿300','คูปอง ฿100'].map((r,i)=>(
+        {['฿500 Coupon','฿300 Coupon','฿100 Coupon'].map((r,i)=>(
           <div key={i} className={`border rounded-xl py-1.5 px-1 text-center text-xs
             ${i===0?'border-yellow-500 text-yellow-300':i===1?'border-gray-400 text-gray-300':'border-orange-500 text-orange-300'}`}
             style={{background:i===0?'rgba(120,80,0,.2)':i===1?'rgba(80,80,80,.15)':'rgba(120,50,0,.2)'}}>
-            <div>🎁 รางวัล</div><div className="font-bold">{r}</div>
+            <div>🎁 Reward</div><div className="font-bold">{r}</div>
           </div>
         ))}
       </div>
     </div>
     <div className="px-3 py-3 space-y-1.5">
-      <div className="text-center text-gray-700 text-xs mb-1">— อันดับ 4–10 —</div>
+      <div className="text-center text-gray-700 text-xs mb-1">— Rank 4–10 —</div>
       {LEADERBOARD.slice(3).map((p,idx)=>(
         <div key={p.rank}
           className={`rounded-xl px-3 py-2 flex items-center gap-2 border ani-slide-up
@@ -1055,7 +1055,7 @@ const Leaderboard=()=>(
           <div className="text-xl leading-none">{p.avatar}</div>
           <div className="flex-1 min-w-0">
             <div className={`text-xs font-semibold truncate ${p.isMe?'text-yellow-300':'text-white'}`}>
-              {p.name}{p.isMe&&<span className="ml-1 text-yellow-500">← ฉัน</span>}
+              {p.name}{p.isMe&&<span className="ml-1 text-yellow-500">← Me</span>}
             </div>
           </div>
           <div className={`font-bold text-sm ${p.isMe?'glow-yellow text-yellow-300':'text-green-400'}`}>
@@ -1065,9 +1065,9 @@ const Leaderboard=()=>(
       ))}
       <div className="mt-2 rounded-xl p-3 text-center border border-yellow-500/40"
         style={{background:'linear-gradient(135deg,rgba(0,121,52,.2),rgba(29,78,216,.15))'}}>
-        <div className="text-yellow-300 font-bold text-sm">🎯 ฉัน (อันดับ 7)</div>
+        <div className="text-yellow-300 font-bold text-sm">🎯 Me (Rank 7)</div>
         <div className="text-white text-xs mt-0.5">
-          อีก <span className="text-yellow-300 font-black text-sm">฿52</span> จะขึ้นอันดับ 6!
+          Only <span className="text-yellow-300 font-black text-sm">฿52</span> more to reach Rank 6!
         </div>
       </div>
       <div style={{height:8}}/>
@@ -1077,14 +1077,14 @@ const Leaderboard=()=>(
 
 const CouponWallet=({coupons,onGoHunt})=>(
   <div className="h-full overflow-y-auto p-3" style={{background:"#071209"}}>
-    <h2 className="text-white font-bold text-sm mb-3">🎫 กระเป๋าคูปอง</h2>
+    <h2 className="text-white font-bold text-sm mb-3">🎫 Coupon Wallet</h2>
     {coupons.length===0?(
       <div className="text-center py-16">
         <div className="text-5xl mb-3">🎯</div>
-        <div className="text-gray-400 text-sm">ยังไม่มีคูปอง</div>
-        <div className="text-gray-600 text-xs mt-1 mb-4">ล่าปีศาจระหว่างช้อป!</div>
+        <div className="text-gray-400 text-sm">No coupons yet</div>
+        <div className="text-gray-600 text-xs mt-1 mb-4">Hunt monsters while shopping!</div>
         <button onClick={onGoHunt} className="px-5 py-2 rounded-xl text-white font-bold text-sm"
-          style={{background:'linear-gradient(135deg,#007934,#6d28d9)'}}>🛒 ไปช้อป</button>
+          style={{background:'linear-gradient(135deg,#007934,#6d28d9)'}}>🛒 Go Shop</button>
       </div>
     ):(
       <div className="space-y-2">
@@ -1097,12 +1097,12 @@ const CouponWallet=({coupons,onGoHunt})=>(
                 <div className="text-white font-bold text-sm">{c.brand}</div>
                 <div className="text-xs font-semibold" style={{color:c.rc}}>{c.rarity}</div>
               </div>
-              <div className="text-green-400 font-bold text-lg">-฿{c.discount}</div>
+              <div className="text-green-400 font-bold text-lg">-฿{c.discount} off</div>
             </div>
             <div className="flex items-center justify-between">
-              <div className="text-gray-500 text-xs">หมดอายุ 31 มี.ค. 2569</div>
+              <div className="text-gray-500 text-xs">Expires Mar 31, 2026</div>
               <button className="px-2.5 py-1 rounded-lg text-white font-bold text-xs"
-                style={{background:'linear-gradient(135deg,#059669,#007934)'}}>📱 ใช้</button>
+                style={{background:'linear-gradient(135deg,#059669,#007934)'}}>📱 Use</button>
             </div>
           </div>
         ))}
@@ -1112,7 +1112,7 @@ const CouponWallet=({coupons,onGoHunt})=>(
 );
 
 const DAILY=[45,72,58,90,120,85,28];
-const DAYS=['จ','อ','พ','พฤ','ศ','ส','อา'];
+const DAYS=['M','T','W','Th','F','Sa','Su'];
 const LineChart=({data,days})=>{
   const W=240,H=110,p={t:10,r:10,b:24,l:30};
   const iW=W-p.l-p.r,iH=H-p.t-p.b,max=Math.max(...data);
@@ -1146,18 +1146,18 @@ const BrandDashboard=()=>(
           <span className="text-slate-400 text-sm">Brand Analytics</span>
         </div>
         <h1 className="text-white font-bold text-xl">📊 Campaign Overview</h1>
-        <p className="text-slate-400 text-sm">Attack ผงซักฟอก — มีนาคม 2569</p>
+        <p className="text-slate-400 text-sm">Attack Laundry — March 2026</p>
       </div>
       <div className="text-right">
         <div className="text-slate-500 text-xs">Last updated</div>
-        <div className="text-slate-200 text-sm font-mono">24 มี.ค. 2569, 09:41</div>
+        <div className="text-slate-200 text-sm font-mono">Mar 24, 2026, 09:41</div>
       </div>
     </div>
     <div className="grid grid-cols-4 gap-3 mb-5">
       {[
-        {icon:'🎫',label:'คูปองแจกไป',      value:'1,247',    unit:'ใบ', f:'#1a4025',t:'#1e2d5f'},
-        {icon:'✅',label:'Redeem จริง',      value:'498',      unit:'ใบ', f:'#14432a',t:'#0f2e1a',sub:'39.9%',sc:'text-emerald-300'},
-        {icon:'📈',label:'ยอดขายเพิ่ม',     value:'+฿124,500',unit:'',  f:'#14532d',t:'#0f3020'},
+        {icon:'🎫',label:'Coupons Issued',   value:'1,247',    unit:'pcs',f:'#1a4025',t:'#1e2d5f'},
+        {icon:'✅',label:'Actual Redeems',   value:'498',      unit:'pcs',f:'#14432a',t:'#0f2e1a',sub:'39.9%',sc:'text-emerald-300'},
+        {icon:'📈',label:'Sales Lift',       value:'+฿124,500',unit:'',  f:'#14532d',t:'#0f3020'},
         {icon:'🚀',label:'ROI',              value:'4.2×',     unit:'',  f:'#3b0764',t:'#2e1065',sub:'vs ฿30k',sc:'text-green-300'},
       ].map((k,i)=>(
         <div key={i} className="rounded-xl p-4 border border-white/10"
@@ -1178,7 +1178,7 @@ const BrandDashboard=()=>(
         <h3 className="text-white font-bold text-sm mb-4">📊 Redemption Rate</h3>
         {[
           {label:'🎮 RouteDee AR',   pct:39.9,f:'#059669',t:'#007934',tc:'text-emerald-400',w:'80%'},
-          {label:'📄 คูปองกระดาษ', pct:2.5, f:'#dc2626',t:'#b91c1c',tc:'text-red-400',    w:'5%'},
+          {label:'📄 Paper Coupon',pct:2.5, f:'#dc2626',t:'#b91c1c',tc:'text-red-400',    w:'5%'},
         ].map((b,i)=>(
           <div key={i} className="mb-3">
             <div className="flex justify-between mb-1">
@@ -1195,7 +1195,7 @@ const BrandDashboard=()=>(
         ))}
         <div className="rounded-xl p-2.5 border border-emerald-600/50 mt-2"
           style={{background:'rgba(5,150,105,.12)'}}>
-          <span className="text-emerald-300 font-bold text-sm">✨ RouteDee ดีกว่า <span className="text-xl font-black">16×</span>!</span>
+          <span className="text-emerald-300 font-bold text-sm">✨ RouteDee is <span className="text-xl font-black">16×</span> better!</span>
         </div>
       </div>
       <div className="rounded-xl p-4 border border-green-900" style={{background:'#132b16'}}>
@@ -1207,11 +1207,11 @@ const BrandDashboard=()=>(
       <div className="rounded-xl p-4 border border-green-900" style={{background:'#132b16'}}>
         <h3 className="text-white font-bold text-sm mb-3">🔥 Traffic Heatmap</h3>
         {[
-          {zone:'🧺 ของใช้',        pct:85,c:'#ef4444'},
-          {zone:'🥬 ผักผลไม้',      pct:72,c:'#f97316'},
-          {zone:'🥤 เครื่องดื่ม',   pct:60,c:'#eab308'},
-          {zone:'🧴 เครื่องสำอาง',  pct:45,c:'#22c55e'},
-          {zone:'🍞 เบเกอรี่',      pct:30,c:'#3b82f6'},
+          {zone:'🧺 Household',   pct:85,c:'#ef4444'},
+          {zone:'🥬 Produce',     pct:72,c:'#f97316'},
+          {zone:'🥤 Beverages',   pct:60,c:'#eab308'},
+          {zone:'🧴 Beauty',      pct:45,c:'#22c55e'},
+          {zone:'🍞 Bakery',      pct:30,c:'#3b82f6'},
         ].map((z,i)=>(
           <div key={i} className="mb-2">
             <div className="flex justify-between mb-0.5">
@@ -1228,10 +1228,10 @@ const BrandDashboard=()=>(
         <h3 className="text-white font-bold text-sm mb-3">💰 Revenue Streams</h3>
         <div className="grid grid-cols-2 gap-3">
           {[
-            {icon:'🏪',label:'SaaS Subscription',desc:'รีเทลจ่ายรายปี',          value:'฿360,000/ปี',  b:'border-blue-500'},
-            {icon:'🤝',label:'Brand Deal Margin', desc:'ส่วนต่างจากแบรนด์',       value:'฿24,900/camp', b:'border-purple-500'},
-            {icon:'📊',label:'Data Analytics',    desc:'Heatmap + Customer Insight',value:'฿15,000/เดือน',b:'border-emerald-500'},
-            {icon:'🚀',label:'Total Brand ROI',   desc:'Attack มี.ค.',            value:'4.2× Return',  b:'border-yellow-500'},
+            {icon:'🏪',label:'SaaS Subscription',desc:'Retail annual fee',        value:'฿360,000/yr',  b:'border-blue-500'},
+            {icon:'🤝',label:'Brand Deal Margin', desc:'Brand margin share',       value:'฿24,900/camp', b:'border-purple-500'},
+            {icon:'📊',label:'Data Analytics',    desc:'Heatmap + Customer Insight',value:'฿15,000/mo',  b:'border-emerald-500'},
+            {icon:'🚀',label:'Total Brand ROI',   desc:'Attack Mar 2026',         value:'4.2× Return',  b:'border-yellow-500'},
           ].map((r,i)=>(
             <div key={i} className={`border-l-4 ${r.b} rounded-r-xl p-3`}
               style={{background:'rgba(255,255,255,.04)'}}>
@@ -1371,7 +1371,7 @@ const App=()=>{
               <div>
                 <div className="text-white font-black text-base leading-none">🛒 RouteDee</div>
                 <div className="text-green-100 text-xs mt-0.5">
-                  {coupons.length} คูปอง · {collected.length}/{waypoints.length||selected.size} จุด
+                  {coupons.length} coupon{coupons.length!==1?'s':''} · {collected.length}/{waypoints.length||selected.size} stops
                 </div>
               </div>
               <div className="text-right">
@@ -1417,10 +1417,10 @@ const App=()=>{
             <div className="shrink-0 border-t border-green-900/60" style={{background:"#071209"}}>
               <div className="flex">
                 {[
-                  {id:'home',  icon:'🏠',label:'หน้าแรก'},
-                  {id:'map',   icon:'🗺️',label:'แผนที่'},
-                  {id:'coupon',icon:'🎫',label:'คูปอง',badge:coupons.length||null},
-                  {id:'rank',  icon:'🏆',label:'อันดับ'},
+                  {id:'home',  icon:'🏠',label:'Home'},
+                  {id:'map',   icon:'🗺️',label:'Map'},
+                  {id:'coupon',icon:'🎫',label:'Coupons',badge:coupons.length||null},
+                  {id:'rank',  icon:'🏆',label:'Ranking'},
                 ].map(t=>(
                   <button key={t.id} onClick={()=>goTab(t.id)}
                     className={`flex-1 py-2.5 flex flex-col items-center relative transition-all
