@@ -65,16 +65,16 @@ const ZONE_DEFS = {
   fresh:  {rx:4,   ry:4,  rw:22,  rh:80, row:0, bg:'#0d2a12',bd:'#15803d',tc:'#86efac',icon:'🥛',name:'นม/ไข่'},
   veg:    {rx:30,  ry:4,  rw:118, rh:80, row:0, bg:'#0d2e14',bd:'#166534',tc:'#4ade80',icon:'🥬',name:'ผักผลไม้'},
   meat:   {rx:152, ry:4,  rw:104, rh:80, row:0, bg:'#3a0b0b',bd:'#991b1b',tc:'#fca5a5',icon:'🥩',name:'เนื้อ/แช่แข็ง'},
-  // Row 1 (middle): TOILETERIES columns
-  clean:  {rx:30,  ry:96, rw:62,  rh:52, row:1, bg:'#0a2212',bd:'#007934',tc:'#86efac',icon:'🧺',name:'ของใช้'},
-  beauty: {rx:96,  ry:96, rw:62,  rh:52, row:1, bg:'#2d0514',bd:'#9f1239',tc:'#f9a8d4',icon:'🧴',name:'เครื่องสำอาง'},
-  // Row 2 (bottom): STAPLE-FOOD parallel vertical aisles
-  grain:  {rx:4,   ry:160,rw:38,  rh:80, row:2, bg:'#2a1504',bd:'#92400e',tc:'#fcd34d',icon:'🍚',name:'ข้าว/แป้ง'},
-  spice:  {rx:46,  ry:160,rw:38,  rh:80, row:2, bg:'#1a0e03',bd:'#a16207',tc:'#fbbf24',icon:'🧂',name:'เครื่องปรุง'},
-  sweet:  {rx:88,  ry:160,rw:38,  rh:80, row:2, bg:'#1f0d2e',bd:'#7e22ce',tc:'#e879f9',icon:'🍫',name:'ของหวาน'},
-  drink:  {rx:130, ry:160,rw:38,  rh:80, row:2, bg:'#0d2a16',bd:'#15803d',tc:'#4ade80',icon:'🥤',name:'เครื่องดื่ม'},
-  coffee: {rx:172, ry:160,rw:38,  rh:80, row:2, bg:'#130a03',bd:'#a16207',tc:'#d4a96a',icon:'☕',name:'กาแฟ/ชา'},
-  bakery: {rx:214, ry:160,rw:42,  rh:80, row:2, bg:'#280a03',bd:'#9a3412',tc:'#fdba74',icon:'🍞',name:'เบเกอรี่'},
+  // Row 1: TOILETERIES — rh=46 leaves 8px gap above+below for visible corridors
+  clean:  {rx:30,  ry:96, rw:62,  rh:46, row:1, bg:'#0a2212',bd:'#007934',tc:'#86efac',icon:'🧺',name:'ของใช้'},
+  beauty: {rx:96,  ry:96, rw:62,  rh:46, row:1, bg:'#2d0514',bd:'#9f1239',tc:'#f9a8d4',icon:'🧴',name:'เครื่องสำอาง'},
+  // Row 2: STAPLE-FOOD — rh=76 leaves 8px gap above+below
+  grain:  {rx:4,   ry:160,rw:38,  rh:76, row:2, bg:'#2a1504',bd:'#92400e',tc:'#fcd34d',icon:'🍚',name:'ข้าว/แป้ง'},
+  spice:  {rx:46,  ry:160,rw:38,  rh:76, row:2, bg:'#1a0e03',bd:'#a16207',tc:'#fbbf24',icon:'🧂',name:'เครื่องปรุง'},
+  sweet:  {rx:88,  ry:160,rw:38,  rh:76, row:2, bg:'#1f0d2e',bd:'#7e22ce',tc:'#e879f9',icon:'🍫',name:'ของหวาน'},
+  drink:  {rx:130, ry:160,rw:38,  rh:76, row:2, bg:'#0d2a16',bd:'#15803d',tc:'#4ade80',icon:'🥤',name:'เครื่องดื่ม'},
+  coffee: {rx:172, ry:160,rw:38,  rh:76, row:2, bg:'#130a03',bd:'#a16207',tc:'#d4a96a',icon:'☕',name:'กาแฟ/ชา'},
+  bakery: {rx:214, ry:160,rw:42,  rh:76, row:2, bg:'#280a03',bd:'#9a3412',tc:'#fdba74',icon:'🍞',name:'เบเกอรี่'},
 };
 const ZONES = {};
 Object.entries(ZONE_DEFS).forEach(([id,d])=>{
@@ -328,22 +328,33 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
       <rect x={2} y={2} width={SVG_W-4} height={SVG_H-38} rx="8"
         fill="#0b1f0e" stroke="#1a4025" strokeWidth="1"/>
 
-      {/* ── AISLE CORRIDORS ── */}
-      {/* Aisle below row0 (between top section and toileteries) */}
-      <rect x={2} y={H_AISLE[0]-5} width={POS_X-4} height={10} fill="#071508" opacity="0.9"/>
-      {/* Aisle below row1 (between toileteries and staple-food) */}
-      <rect x={2} y={H_AISLE[1]-5} width={POS_X-4} height={10} fill="#071508" opacity="0.9"/>
-      {/* Aisles BETWEEN staple-food vertical columns (walkalongs) */}
-      {[44,86,128,170,212].map((x,i)=>(
-        <rect key={i} x={x} y={160} width={4} height={80} fill="#071508" opacity="0.8"/>
+      {/* ══ WALKING CORRIDORS (horizontal) ══
+          These are the spaces between zone rows — clearly walkable paths.
+          H_AISLE[0]=88 connects row0↔row1 (both rows open to this).
+          H_AISLE[1]=152 connects row1↔row2.
+          H_AISLE[2]=244 connects row2↔main corridor below. */}
+      {[0,1,2].map(i=>(
+        <rect key={i} x={2} y={H_AISLE[i]-8} width={POS_X-4} height={16}
+          fill="#051208" stroke="#193520" strokeWidth="0.5" opacity="0.95"/>
       ))}
-      {/* Main corridor below all zones */}
-      <rect x={2} y={H_AISLE[2]+2} width={SVG_W-4} height={16} fill="#071d0a" opacity="0.95"/>
-      {/* Main corridor extended (before entrance) */}
-      <rect x={2} y={H_AISLE[3]-4} width={SVG_W-4} height={12} fill="#061408" opacity="0.9"/>
+      {/* Corridor centre-line markers */}
+      {[0,1,2].map(i=>(
+        <line key={i} x1={6} y1={H_AISLE[i]} x2={POS_X-6} y2={H_AISLE[i]}
+          stroke="#1a4025" strokeWidth="0.6" strokeDasharray="8,6" opacity="0.5"/>
+      ))}
+      {/* Vertical gaps BETWEEN staple-food aisles */}
+      {[44,86,128,170,212].map((x,i)=>(
+        <rect key={i} x={x} y={160} width={4} height={76} fill="#051208" opacity="0.8"/>
+      ))}
+      {/* Main corridor */}
+      <rect x={2} y={H_AISLE[2]+10} width={SVG_W-4} height={18} fill="#071d0a" opacity="0.95"/>
+      <rect x={2} y={H_AISLE[3]-4}  width={SVG_W-4} height={12} fill="#061408" opacity="0.9"/>
+      {/* Left-wall vertical corridor label */}
+      <rect x={0} y={H_AISLE[0]} width={3} height={H_AISLE[2]-H_AISLE[0]}
+        fill="#007934" opacity="0.25"/>
 
       {/* ── HOT OFFER promo area in row1 right side ── */}
-      <rect x={162} y={96} width={94} height={52} rx="4"
+      <rect x={162} y={96} width={94} height={46} rx="4"
         fill="#1a0800" stroke="#92400e" strokeWidth="1" strokeDasharray="3,2" opacity="0.8"/>
       <text x={209} y={118} textAnchor="middle" fontSize="9" fill="#f59e0b" fontWeight="700">🔥 HOT OFFER</text>
       <text x={209} y={131} textAnchor="middle" fontSize="7" fill="#d97706">โปรโมชั่นพิเศษ</text>
@@ -373,27 +384,71 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
       <text x={posMid} y={SVG_H-44} textAnchor="middle" fontSize="12" fill="#4ade80">→</text>
       <text x={posMid} y={SVG_H-34} textAnchor="middle" fontSize="6" fill="#2d5a35">EXIT</text>
 
-      {/* ── ZONE BLOCKS ── */}
+      {/* ── ZONE BLOCKS ──
+          Shelves are drawn with OPEN TOP/BOTTOM ends (dashed = walkable)
+          and SOLID LEFT/RIGHT walls (shelves you can't cross).
+          This matches the routing logic: enter/exit from top or bottom. */}
       {Object.values(ZONES).map(z=>{
         const wpIdx = zoneWpIdx[z.id];
         const inRoute = wpIdx !== undefined;
         const done = inRoute && collected.includes(wpIdx);
         const active = wpIdx === stepIdx;
-        const isDairy = z.id === 'fresh'; // thin DAIRY strip — special rendering
+        const isDairy = z.id === 'fresh';
+        const wallColor = active ? '#ffd700' : done ? '#10b981' : z.bd;
+        const wallW = active || done ? 2 : 1.5;
+        const op = inRoute ? 1 : 0.72;
+        // row 0 has no top aisle (store wall), rows 1-2 have open top
+        const openTop    = z.row > 0;
+        // all zones have an open bottom (corridor below)
+        const openBottom = true;
         return (
-          <g key={z.id}>
-            <rect x={z.rx} y={z.ry} width={z.rw} height={z.rh} rx={isDairy?3:5}
-              fill={z.bg} stroke={active?'#ffd700':done?'#10b981':z.bd}
-              strokeWidth={active||done?2:1.5}
-              opacity={inRoute?1:0.75}/>
-            {/* shelf lines — horizontal for normal zones, skip for dairy strip */}
-            {!isDairy && [0.34,0.67].map((r,si)=>(
-              <line key={si} x1={z.rx+4} y1={z.ry+z.rh*r} x2={z.rx+z.rw-4} y2={z.ry+z.rh*r}
-                stroke={z.bd} strokeWidth="0.7" opacity="0.4"/>
-            ))}
+          <g key={z.id} opacity={op}>
+            {/* Zone fill — no stroke, just background */}
+            <rect x={z.rx} y={z.ry} width={z.rw} height={z.rh} fill={z.bg}/>
 
+            {/* ── SHELF LINES inside zone ──
+                Row 2 (vertical aisles): horizontal shelf lines
+                Row 0-1 (open areas):   vertical section dividers */}
+            {z.row === 2
+              ? [0.22,0.44,0.66,0.88].map((r,si)=>(
+                  <line key={si}
+                    x1={z.rx+3} y1={z.ry+z.rh*r} x2={z.rx+z.rw-3} y2={z.ry+z.rh*r}
+                    stroke={z.bd} strokeWidth="1.2" opacity="0.4"/>
+                ))
+              : !isDairy && [0.33,0.67].map((r,si)=>(
+                  <line key={si}
+                    x1={z.rx+z.rw*r} y1={z.ry+4} x2={z.rx+z.rw*r} y2={z.ry+z.rh-4}
+                    stroke={z.bd} strokeWidth="0.8" opacity="0.3"/>
+                ))
+            }
+
+            {/* ── WALLS: left + right (solid — can't walk through) ── */}
+            <line x1={z.rx}      y1={z.ry} x2={z.rx}      y2={z.ry+z.rh}
+              stroke={wallColor} strokeWidth={wallW}/>
+            <line x1={z.rx+z.rw} y1={z.ry} x2={z.rx+z.rw} y2={z.ry+z.rh}
+              stroke={wallColor} strokeWidth={wallW}/>
+
+            {/* ── TOP edge: solid if store wall (row 0), open/dashed if walkway ── */}
+            {openTop
+              ? <line x1={z.rx} y1={z.ry} x2={z.rx+z.rw} y2={z.ry}
+                  stroke={z.tc} strokeWidth="1" strokeDasharray="4,3" opacity="0.35"/>
+              : <line x1={z.rx} y1={z.ry} x2={z.rx+z.rw} y2={z.ry}
+                  stroke={wallColor} strokeWidth={wallW}/>
+            }
+            {/* ── BOTTOM edge: always open/dashed (walkway below all zones) ── */}
+            <line x1={z.rx} y1={z.ry+z.rh} x2={z.rx+z.rw} y2={z.ry+z.rh}
+              stroke={z.tc} strokeWidth="1" strokeDasharray="4,3" opacity="0.35"/>
+
+            {/* ── WALKWAY gap indicators (▲▼ at open ends) ── */}
+            {openTop && (
+              <text x={z.cx} y={z.ry+6} textAnchor="middle"
+                fill={z.tc} fontSize="5" opacity="0.45">▲</text>
+            )}
+            <text x={z.cx} y={z.ry+z.rh-1} textAnchor="middle"
+              fill={z.tc} fontSize="5" opacity="0.45">▼</text>
+
+            {/* ── CONTENT ── */}
             {isDairy ? (
-              /* DAIRY strip: rotated label */
               <>
                 <text x={z.cx} y={z.ry+26} textAnchor="middle" fontSize="10">{z.icon}</text>
                 <g transform={`rotate(-90,${z.cx},${z.ry+z.rh/2})`}>
@@ -402,24 +457,22 @@ const StoreMap = ({ waypoints, stepIdx, userPos, collected }) => {
                 </g>
               </>
             ) : (
-              /* Normal zone rendering */
               <>
-                <text x={z.cx} y={z.ry+21} textAnchor="middle" fontSize="13">{z.icon}</text>
-                <text x={z.cx} y={z.ry+34} textAnchor="middle" fill={z.tc}
-                  fontSize={z.rw<44?'6.5':'7.5'} fontWeight="600"
-                  style={{wordBreak:'break-all'}}>{z.name}</text>
-                {/* item count pill */}
+                <text x={z.cx} y={z.ry+18} textAnchor="middle" fontSize="12">{z.icon}</text>
+                <text x={z.cx} y={z.ry+30} textAnchor="middle" fill={z.tc}
+                  fontSize={z.rw<44?'6':'7'} fontWeight="600">{z.name}</text>
                 {inRoute && !done && (
                   <>
-                    <rect x={z.cx-11} y={z.ry+39} width="22" height="11" rx="5"
+                    <rect x={z.cx-11} y={z.ry+34} width="22" height="11" rx="5"
                       fill={active?'#007934':'rgba(255,255,255,.1)'}/>
-                    <text x={z.cx} y={z.ry+47} textAnchor="middle" fill="white" fontSize="7" fontWeight="700">
+                    <text x={z.cx} y={z.ry+42} textAnchor="middle"
+                      fill="white" fontSize="7" fontWeight="700">
                       {waypoints[wpIdx].items.length}ชิ้น
                     </text>
                   </>
                 )}
                 {done && (
-                  <text x={z.cx} y={z.ry+48} textAnchor="middle" fill="#4ade80" fontSize="9">✓</text>
+                  <text x={z.cx} y={z.ry+43} textAnchor="middle" fill="#4ade80" fontSize="9">✓</text>
                 )}
               </>
             )}
