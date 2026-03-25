@@ -81,46 +81,85 @@ Object.entries(ZONE_DEFS).forEach(([id,d])=>{
   ZONES[id]={...d,id,cx:d.rx+Math.round(d.rw/2),cy:d.ry+Math.round(d.rh/2)};
 });
 
-/* ── Aisle routing — uses left-wall corridor (x=2) for cross-row moves ──
-   Ensures path never cuts through zone/shelf blocks.
-   exit point (POS checkout) is right side at row-0 level.           ── */
-const EXIT_POS = { x: POS_X - 6, y: 44 }; // walk to POS checkout area
+/* ── Aisle routing — direction-aware, two-sided zone access ────────────
+   Each zone has TWO aisles: topY (above zone) and bottomY (below zone).
+   Row 0 zones:  topY=null,        bottomY=H_AISLE[0]
+   Row 1 zones:  topY=H_AISLE[0],  bottomY=H_AISLE[1]
+   Row 2 zones:  topY=H_AISLE[1],  bottomY=H_AISLE[2]
 
-const getPos = id => {
-  if (id === 'entrance') return {cx:ENTRANCE.x, cy:ENTRANCE.y, aisle:H_AISLE[3]};
-  if (id === 'exit')     return {cx:EXIT_POS.x,  cy:EXIT_POS.y,  aisle:H_AISLE[0]};
-  return {cx:ZONES[id].cx, cy:ZONES[id].cy, aisle:H_AISLE[ZONES[id].row]};
+   Routing rule:
+   • Going UP  (smaller y) → exit via topY,    enter via bottomY
+   • Going DOWN(larger y)  → exit via bottomY, enter via topY
+   • Same row              → both use bottomY (same corridor)
+   • Adjacent rows share an aisle → NO vertical corridor needed!
+   • Non-adjacent rows use left-wall (x=2) as vertical passage.
+
+   Result: path walks THROUGH zones (in one end, out the other),
+   never backtracks, never cuts through shelves.              ── */
+const EXIT_POS = { x: POS_X-6, y: 44 };
+
+const getNodePos = id => {
+  if (id === 'entrance') return {cx:ENTRANCE.x,cy:ENTRANCE.y,topY:H_AISLE[3],bottomY:null,     row:3};
+  if (id === 'exit')     return {cx:EXIT_POS.x, cy:EXIT_POS.y, topY:null,      bottomY:H_AISLE[0],row:-1};
+  const z = ZONES[id];
+  return {
+    cx:z.cx, cy:z.cy, row:z.row,
+    topY:    z.row===0 ? null : H_AISLE[z.row-1],
+    bottomY: H_AISLE[z.row],
+  };
 };
 
-const VCORR = 2; // left-wall vertical corridor X (outside all zone blocks)
+const VCORR = 2; // left-wall vertical passage (clear of ALL zone blocks)
 
 const aisleRoute = (fromId, toId) => {
-  const f = getPos(fromId), t = getPos(toId);
+  const f = getNodePos(fromId);
+  const t = getNodePos(toId);
   const pts = [[f.cx, f.cy]];
-  // 1. exit source zone to its row's horizontal aisle
-  if (f.cy !== f.aisle) pts.push([f.cx, f.aisle]);
-  if (f.aisle === t.aisle) {
-    // same horizontal aisle — walk straight across
-    if (f.cx !== t.cx) pts.push([t.cx, f.aisle]);
+  const sameRow = f.row === t.row;
+  const goingUp = !sameRow && t.cy < f.cy; // toward row 0
+
+  // ── Choose which aisle to exit/enter ──
+  // Source: exit from top if going up (walk THROUGH the zone upward), else exit from bottom
+  const f_exit = (goingUp && f.topY !== null) ? f.topY
+               : (f.bottomY !== null ? f.bottomY : f.topY);
+  // Target: enter from bottom if going up (arrive from below), else enter from top
+  const t_entry = sameRow ? t.bottomY
+                : (goingUp && t.bottomY !== null) ? t.bottomY
+                : (t.topY !== null ? t.topY : t.bottomY);
+
+  // ── Step 1: exit source zone (walk from center to exit aisle) ──
+  if (f.cy !== f_exit) pts.push([f.cx, f_exit]);
+
+  // ── Step 2: travel to target entry aisle ──
+  if (f_exit === t_entry) {
+    // Same corridor (adjacent rows share an aisle) — walk straight across
+    if (f.cx !== t.cx) pts.push([t.cx, f_exit]);
   } else {
-    // different aisles — route through left-wall vertical corridor
-    // (x=2 is clear of all shelf blocks across every row)
-    if (pts[pts.length-1][0] !== VCORR) pts.push([VCORR, f.aisle]);
-    pts.push([VCORR, t.aisle]);
-    if (VCORR !== t.cx) pts.push([t.cx, t.aisle]);
+    // Non-adjacent: use left-wall vertical corridor
+    const cur = pts[pts.length-1];
+    if (cur[0] !== VCORR) pts.push([VCORR, f_exit]);
+    pts.push([VCORR, t_entry]);
+    if (VCORR !== t.cx) pts.push([t.cx, t_entry]);
   }
-  // 2. enter target zone (move from aisle into zone center)
+
+  // ── Step 3: enter target zone (walk from aisle to center) ──
   const last = pts[pts.length-1];
-  if (last[0] !== t.cx || last[1] !== t.cy) {
-    if (t.cy !== t.aisle) pts.push([t.cx, t.cy]);
-  }
+  if (last[0] !== t.cx || last[1] !== t.cy) pts.push([t.cx, t.cy]);
   return pts;
 };
 
-/* Manhattan distance through aisles */
-const aisleDistance = (a,b)=>{
-  const f=getPos(a),t=getPos(b);
-  return Math.abs(f.cy-f.aisle)+Math.abs(t.cx-f.cx)+Math.abs(t.aisle-f.aisle)+Math.abs(t.cy-t.aisle);
+/* Accurate Manhattan distance using the same direction-aware routing */
+const aisleDistance = (a, b) => {
+  const f = getNodePos(a), t = getNodePos(b);
+  const sameRow = f.row === t.row;
+  const goingUp = !sameRow && t.cy < f.cy;
+  const f_exit  = (goingUp && f.topY!==null) ? f.topY : (f.bottomY!==null ? f.bottomY : f.topY);
+  const t_entry = sameRow ? t.bottomY : (goingUp && t.bottomY!==null) ? t.bottomY : (t.topY!==null ? t.topY : t.bottomY);
+  let d = Math.abs(f.cy - f_exit);                          // exit zone
+  if (f_exit === t_entry) d += Math.abs(t.cx - f.cx);       // same corridor: horizontal walk
+  else d += Math.abs(f.cx - VCORR) + Math.abs(f_exit - t_entry) + Math.abs(t.cx - VCORR); // via left wall
+  d += Math.abs(t.cy - t_entry);                            // enter zone
+  return d;
 };
 
 /* Nearest-neighbor TSP from entrance */
